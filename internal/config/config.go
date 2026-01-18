@@ -49,7 +49,46 @@ func LoadFromFile(path string) (*types.Config, error) {
 		return nil, fmt.Errorf("failed to parse config file: %w", err)
 	}
 
+	// Initialize services map if nil
+	if config.Services == nil {
+		config.Services = make(map[string]types.ServiceConfig)
+	}
+
+	// Load additional services from services.yaml
+	configDir := filepath.Dir(path)
+	servicesPath := filepath.Join(configDir, DefaultServicesFile)
+	if err := loadServicesInto(&config, servicesPath); err != nil {
+		// Ignore if services file doesn't exist
+		if !os.IsNotExist(err) {
+			return nil, err
+		}
+	}
+
 	return &config, nil
+}
+
+// loadServicesInto loads services from services.yaml into the config
+func loadServicesInto(config *types.Config, path string) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	var servicesFile struct {
+		Services map[string]types.ServiceConfig `yaml:"services"`
+	}
+
+	if err := yaml.Unmarshal(data, &servicesFile); err != nil {
+		return fmt.Errorf("failed to parse services file: %w", err)
+	}
+
+	// Merge services (services.yaml takes precedence for conflicts)
+	for name, svc := range servicesFile.Services {
+		svc.Name = name
+		config.Services[name] = svc
+	}
+
+	return nil
 }
 
 // Init creates the default configuration files
@@ -95,13 +134,21 @@ func GetConfigDir() (string, error) {
 var defaultConfig = `# sreq configuration
 # Documentation: https://github.com/Priyans-hu/sreq
 
+# Available placeholders in paths:
+#   {service} - Service name (from -s flag or consul_key)
+#   {env}     - Environment (from -e flag)
+#   {region}  - Region (from -r flag)
+#   {project} - Project name (from -p flag)
+#   {app}     - App name (from -a flag)
+
 providers:
   consul:
     address: localhost:8500
     # token: ${CONSUL_TOKEN}
+    # datacenter: us-east-1
     paths:
-      base_url: "services/{service}/config/base_url"
-      username: "services/{service}/config/username"
+      base_url: "{project}/{env}/{app}/{region}/config/{service}/base_url"
+      username: "{project}/{env}/{app}/{region}/config/{service}/username"
 
   aws_secrets:
     region: us-east-1
@@ -116,6 +163,24 @@ environments:
   - prod
 
 default_env: dev
+
+# Contexts are presets for quick switching between environments
+# Use with: sreq run GET /api -s myservice -c dev-us
+contexts:
+  # Example contexts - customize for your setup
+  # dev-us:
+  #   project: myproject
+  #   env: dev
+  #   region: us-east-1
+  #   app: myapp
+  #
+  # prod-eu:
+  #   project: myproject
+  #   env: prod
+  #   region: eu-west-1
+  #   app: myapp
+
+# default_context: dev-us
 `
 
 var defaultServices = `# sreq services configuration
