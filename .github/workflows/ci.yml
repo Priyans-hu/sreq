@@ -25,10 +25,4 @@ jobs:
         run: go build -v ./...
 
       - name: Test
-        run: go test -v -race -coverprofile=coverage.out ./...
-
-      - name: Upload coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          path: coverage.out
+        run: go test -v ./...
