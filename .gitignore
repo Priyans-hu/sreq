@@ -1,5 +1,6 @@
 # Binaries
 sreq
+sreq-*
 *.exe
 *.exe~
 *.dll
@@ -9,36 +10,96 @@ sreq
 # Build output
 /dist/
 /bin/
+/out/
+/build/
 
-# Test binary
+# Test binary and coverage
 *.test
-
-# Output of go coverage
 *.out
+*.prof
 coverage.html
+coverage.txt
+coverage.xml
+.coverprofile
+
+# Go workspace
+go.work
+go.work.sum
 
 # Dependency directories
 vendor/
 
-# IDE
+# Go build cache
+.go-build/
+
+# GoReleaser
+/dist/
+/artifacts/
+
+# IDE & Editors
 .idea/
 .vscode/
 *.swp
 *.swo
+*.swn
 *~
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+*.iml
 
 # OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
 # Local config (don't commit secrets)
 .env
-.env.local
+.env.*
+!.env.example
 *.local.yaml
+*.local.json
+secrets.yaml
+secrets.json
+
+# sreq runtime files (user's machine)
+.sreq/
+.key
+
+# Logs
+*.log
+logs/
 
 # Debug
 debug
-__debug_bin
+debug.*
+__debug_bin*
+*.pprof
 
-# Local brainstorm (not for repo)
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+.cache/
+tmp/
+temp/
+
+# Local notes (not for repo)
 .brainstorm.md
+.notes.md
+.todo.md
+TODO.local.md
+
+# Archives
+*.zip
+*.tar.gz
+*.tgz
+*.rar
