@@ -53,12 +53,22 @@ type ProviderConfig struct {
 	Paths map[string]string `yaml:"paths,omitempty"`
 }
 
+// Context represents a preset of variables for quick switching
+type Context struct {
+	Project string `yaml:"project,omitempty"`
+	Env     string `yaml:"env,omitempty"`
+	Region  string `yaml:"region,omitempty"`
+	App     string `yaml:"app,omitempty"`
+}
+
 // Config represents the main configuration
 type Config struct {
-	Providers    map[string]ProviderConfig `yaml:"providers"`
-	Environments []string                  `yaml:"environments"`
-	DefaultEnv   string                    `yaml:"default_env"`
-	Services     map[string]ServiceConfig  `yaml:"services,omitempty"`
+	Providers      map[string]ProviderConfig `yaml:"providers"`
+	Environments   []string                  `yaml:"environments"`
+	DefaultEnv     string                    `yaml:"default_env"`
+	Services       map[string]ServiceConfig  `yaml:"services,omitempty"`
+	Contexts       map[string]Context        `yaml:"contexts,omitempty"`
+	DefaultContext string                    `yaml:"default_context,omitempty"`
 }
 
 // ResolvedCredentials contains the resolved credentials for a service

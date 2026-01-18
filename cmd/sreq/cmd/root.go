@@ -13,6 +13,8 @@ var (
 	environment string
 	region      string
 	project     string
+	app         string
+	contextName string
 	verbose     bool
 	dryRun      bool
 )
@@ -32,7 +34,12 @@ Quick Start:
 Examples:
   sreq run GET /api/v1/users -s auth-service -e dev
   sreq run POST /api/v1/users -s auth-service -d '{"name":"test"}'
-  sreq run GET /health -s billing-service --verbose --dry-run`,
+  sreq run GET /health -s billing-service --verbose --dry-run
+
+Using contexts (presets for env/region/project/app):
+  sreq run GET /api -s auth-service -c dev-us     # Use dev-us context
+  sreq run GET /api -s auth-service -c prod-eu    # Use prod-eu context
+  sreq run GET /api -s auth-service -c dev-us -r us-west-2  # Context + override`,
 	Version: Version,
 }
 
@@ -42,9 +49,11 @@ func Execute() error {
 
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&serviceName, "service", "s", "", "Service name")
-	rootCmd.PersistentFlags().StringVarP(&environment, "env", "e", "", "Environment (dev/staging/prod)")
-	rootCmd.PersistentFlags().StringVarP(&region, "region", "r", "", "Region (e.g., us-east-1)")
-	rootCmd.PersistentFlags().StringVarP(&project, "project", "p", "", "Project name")
+	rootCmd.PersistentFlags().StringVarP(&contextName, "context", "c", "", "Context name (preset of project/env/region/app)")
+	rootCmd.PersistentFlags().StringVarP(&environment, "env", "e", "", "Environment (overrides context)")
+	rootCmd.PersistentFlags().StringVarP(&region, "region", "r", "", "Region (overrides context)")
+	rootCmd.PersistentFlags().StringVarP(&project, "project", "p", "", "Project name (overrides context)")
+	rootCmd.PersistentFlags().StringVarP(&app, "app", "a", "", "App name (overrides context)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Show what would be sent without executing")
 }
