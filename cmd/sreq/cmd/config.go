@@ -1,11 +1,14 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/Priyans-hu/sreq/internal/config"
+	"github.com/Priyans-hu/sreq/internal/resolver"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -29,10 +32,26 @@ var configPathCmd = &cobra.Command{
 	RunE:  runConfigPath,
 }
 
+var configTestCmd = &cobra.Command{
+	Use:   "test",
+	Short: "Test provider authentication",
+	Long: `Verify that authentication is properly configured for all providers.
+
+This command checks:
+  - Consul: connectivity and token validity
+  - AWS: credentials and Secrets Manager access
+
+Examples:
+  sreq config test           # Test all providers
+  sreq config test --verbose # Show detailed output`,
+	RunE: runConfigTest,
+}
+
 func init() {
 	rootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(configShowCmd)
 	configCmd.AddCommand(configPathCmd)
+	configCmd.AddCommand(configTestCmd)
 }
 
 func runConfigShow(cmd *cobra.Command, args []string) error {
@@ -108,6 +127,119 @@ func runConfigPath(cmd *cobra.Command, args []string) error {
 		fmt.Printf("%s (from SREQ_CONFIG)\n", configPath)
 	} else {
 		fmt.Println(configPath)
+	}
+
+	return nil
+}
+
+func runConfigTest(cmd *cobra.Command, args []string) error {
+	fmt.Println("Testing provider authentication...")
+	fmt.Println()
+
+	cfg, err := config.Load()
+	if err != nil {
+		return fmt.Errorf("failed to load config: %w", err)
+	}
+
+	// Create resolver to initialize providers
+	res, err := resolver.New(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to initialize providers: %w", err)
+	}
+
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Run health checks
+	results := res.HealthCheck(ctx)
+
+	// Track overall status
+	allPassed := true
+	testedCount := 0
+
+	// Check Consul
+	if _, exists := cfg.Providers["consul"]; exists {
+		testedCount++
+		fmt.Print("Consul: ")
+		if err, hasErr := results["consul"]; hasErr && err != nil {
+			fmt.Printf("FAILED\n")
+			fmt.Printf("  Error: %v\n", err)
+			if verbose {
+				fmt.Printf("  Address: %s\n", cfg.Providers["consul"].Address)
+			}
+			allPassed = false
+		} else if _, ok := results["consul"]; ok {
+			fmt.Printf("OK\n")
+			if verbose {
+				fmt.Printf("  Address: %s\n", cfg.Providers["consul"].Address)
+			}
+		} else {
+			fmt.Printf("SKIPPED (not initialized)\n")
+		}
+	}
+
+	// Check AWS
+	if _, exists := cfg.Providers["aws_secrets"]; exists {
+		testedCount++
+		fmt.Print("AWS Secrets Manager: ")
+		// Check for aws or aws_secrets key in results
+		var awsErr error
+		var awsFound bool
+		if err, ok := results["aws"]; ok {
+			awsErr = err
+			awsFound = true
+		} else if err, ok := results["aws_secrets"]; ok {
+			awsErr = err
+			awsFound = true
+		}
+
+		if awsFound {
+			if awsErr != nil {
+				fmt.Printf("FAILED\n")
+				fmt.Printf("  Error: %v\n", awsErr)
+				if verbose {
+					fmt.Printf("  Region: %s\n", cfg.Providers["aws_secrets"].Region)
+					if cfg.Providers["aws_secrets"].Profile != "" {
+						fmt.Printf("  Profile: %s\n", cfg.Providers["aws_secrets"].Profile)
+					}
+				}
+				allPassed = false
+			} else {
+				fmt.Printf("OK\n")
+				if verbose {
+					fmt.Printf("  Region: %s\n", cfg.Providers["aws_secrets"].Region)
+				}
+			}
+		} else {
+			fmt.Printf("SKIPPED (not initialized)\n")
+		}
+	} else if _, exists := cfg.Providers["aws"]; exists {
+		testedCount++
+		fmt.Print("AWS Secrets Manager: ")
+		if err, ok := results["aws"]; ok && err != nil {
+			fmt.Printf("FAILED\n")
+			fmt.Printf("  Error: %v\n", err)
+			allPassed = false
+		} else if _, ok := results["aws"]; ok {
+			fmt.Printf("OK\n")
+		} else {
+			fmt.Printf("SKIPPED (not initialized)\n")
+		}
+	}
+
+	fmt.Println()
+
+	if testedCount == 0 {
+		fmt.Println("No providers configured. Run 'sreq auth' to set up authentication.")
+		return nil
+	}
+
+	if allPassed {
+		fmt.Println("All provider tests passed!")
+	} else {
+		fmt.Println("Some provider tests failed. Check your configuration with 'sreq auth'.")
+		return fmt.Errorf("authentication test failed")
 	}
 
 	return nil
