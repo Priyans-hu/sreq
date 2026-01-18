@@ -11,6 +11,7 @@ import (
 	"github.com/Priyans-hu/sreq/internal/client"
 	"github.com/Priyans-hu/sreq/internal/config"
 	sreerrors "github.com/Priyans-hu/sreq/internal/errors"
+	"github.com/Priyans-hu/sreq/internal/history"
 	"github.com/Priyans-hu/sreq/internal/resolver"
 	"github.com/Priyans-hu/sreq/pkg/types"
 	"github.com/spf13/cobra"
@@ -29,7 +30,7 @@ Examples:
   sreq run POST /api/v1/users -s auth-service -d '{"name":"test"}'
   sreq run GET /health -s billing-service --verbose`,
 	Args: cobra.MinimumNArgs(2),
-	RunE: runRequest,
+	RunE: runRun,
 }
 
 var (
@@ -48,9 +49,10 @@ func init() {
 	requestCmd.Flags().DurationVar(&timeout, "timeout", 30*time.Second, "Request timeout")
 }
 
-func runRequest(cmd *cobra.Command, args []string) error {
+func runRun(cmd *cobra.Command, args []string) error {
 	method := strings.ToUpper(args[0])
 	path := args[1]
+	startTime := time.Now()
 
 	// Validate method
 	validMethods := map[string]bool{
@@ -225,12 +227,58 @@ func runRequest(cmd *cobra.Command, args []string) error {
 
 	// Execute request
 	resp, err := httpClient.Do(ctx, req, creds)
+	duration := time.Since(startTime).Milliseconds()
+
+	// Save to history (unless disabled or dry run)
+	if os.Getenv("SREQ_NO_HISTORY") != "1" && !dryRun {
+		saveHistory(method, path, serviceName, environment, creds.BaseURL, headers, body, resp, duration)
+	}
+
 	if err != nil {
 		return sreerrors.RequestFailed(creds.BaseURL+path, err)
 	}
 
 	// Output response
 	return outputResponse(resp, outputFormat)
+}
+
+// saveHistory saves the request to history
+func saveHistory(method, path, service, env, baseURL string, headers map[string]string, body string, resp *types.Response, durationMs int64) {
+	configDir, err := config.GetConfigDir()
+	if err != nil {
+		return // Silently fail - history is optional
+	}
+
+	h, err := history.New(configDir)
+	if err != nil {
+		return
+	}
+
+	entry := history.Entry{
+		Timestamp: time.Now(),
+		Service:   service,
+		Env:       env,
+		Method:    method,
+		Path:      path,
+		BaseURL:   baseURL,
+		Duration:  durationMs,
+		Request: &history.Request{
+			Headers: headers,
+			Body:    body,
+		},
+	}
+
+	// Add response info if available
+	if resp != nil {
+		entry.Status = resp.StatusCode
+		entry.Response = &history.Response{
+			Status:    resp.Status,
+			SizeBytes: len(resp.Body),
+		}
+	}
+
+	h.Add(entry)
+	_ = h.Save() // Ignore save errors - history is optional
 }
 
 func truncate(s string, maxLen int) string {
