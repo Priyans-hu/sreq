@@ -119,10 +119,33 @@ default_env: dev
 `
 
 var defaultServices = `# sreq services configuration
-# Add your services here
+# Documentation: https://github.com/Priyans-hu/sreq
 
 services:
+  # ===================
+  # SIMPLE MODE
+  # ===================
+  # Use when your Consul/AWS structure follows a standard pattern.
+  # sreq uses the path templates from config.yaml to resolve credentials.
+  #
   # example-service:
-  #   consul_key: example
-  #   aws_prefix: example-service
+  #   consul_key: example           # Used in: services/{consul_key}/config/*
+  #   aws_prefix: example-service   # Used in: {aws_prefix}/{env}/credentials
+
+  # ===================
+  # ADVANCED MODE
+  # ===================
+  # Use when you need explicit control over credential paths.
+  # Supports mixed providers and complex structures.
+  #
+  # invoice:
+  #   paths:
+  #     base_url: "billing_service/invoice_svc_url"           # Consul (default)
+  #     username: "billing_service/invoice_svc_username"      # Consul
+  #     password: "aws:billing/{env}/invoice#password"        # AWS with JSON key
+  #
+  # Path format: [provider:]path[#jsonkey]
+  #   - provider: consul (default), aws, vault, env
+  #   - path: the key path (supports {service}, {env} placeholders)
+  #   - #jsonkey: extract a key from JSON value (for AWS secrets)
 `
