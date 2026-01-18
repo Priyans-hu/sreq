@@ -100,7 +100,7 @@ func (c *Client) Do(ctx context.Context, req *types.Request, creds *types.Resolv
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Read the response body
 	respBody, err := io.ReadAll(resp.Body)
