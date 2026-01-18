@@ -1,6 +1,6 @@
 # Binaries
-sreq
-sreq-*
+/sreq
+/sreq-*
 *.exe
 *.exe~
 *.dll
