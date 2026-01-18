@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Priyans-hu/sreq/internal/config"
+	sreerrors "github.com/Priyans-hu/sreq/internal/errors"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -141,11 +142,11 @@ func runServiceAdd(cmd *cobra.Command, args []string) error {
 	hasAdvancedFlags := len(pathMappings) > 0
 
 	if hasSimpleFlags && hasAdvancedFlags {
-		return fmt.Errorf("cannot mix simple mode (--consul-key, --aws-prefix) with advanced mode (--path)")
+		return sreerrors.ServiceModeMixed()
 	}
 
 	if !hasSimpleFlags && !hasAdvancedFlags {
-		return fmt.Errorf("specify either simple mode flags (--consul-key, --aws-prefix) or advanced mode (--path)")
+		return sreerrors.ServiceModeRequired()
 	}
 
 	configDir, err := config.GetConfigDir()
@@ -172,7 +173,7 @@ func runServiceAdd(cmd *cobra.Command, args []string) error {
 
 	// Check if service already exists
 	if _, exists := services[name]; exists {
-		return fmt.Errorf("service '%s' already exists", name)
+		return sreerrors.ServiceAlreadyExists(name)
 	}
 
 	// Build service config based on mode
@@ -193,12 +194,12 @@ func runServiceAdd(cmd *cobra.Command, args []string) error {
 		for _, mapping := range pathMappings {
 			parts := strings.SplitN(mapping, "=", 2)
 			if len(parts) != 2 {
-				return fmt.Errorf("invalid path mapping: %s (expected key=value)", mapping)
+				return sreerrors.InvalidPathMapping(mapping)
 			}
 			key := strings.TrimSpace(parts[0])
 			value := strings.TrimSpace(parts[1])
 			if key == "" || value == "" {
-				return fmt.Errorf("invalid path mapping: %s (key and value cannot be empty)", mapping)
+				return sreerrors.InvalidPathMapping(mapping)
 			}
 			paths[key] = value
 		}
@@ -258,11 +259,11 @@ func runServiceRemove(cmd *cobra.Command, args []string) error {
 
 	services, ok := data["services"].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("service '%s' not found", name)
+		return sreerrors.ServiceNotFound(name)
 	}
 
 	if _, exists := services[name]; !exists {
-		return fmt.Errorf("service '%s' not found", name)
+		return sreerrors.ServiceNotFound(name)
 	}
 
 	delete(services, name)

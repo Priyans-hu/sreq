@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	sreerrors "github.com/Priyans-hu/sreq/internal/errors"
 	"github.com/Priyans-hu/sreq/internal/providers"
 	"github.com/Priyans-hu/sreq/internal/providers/aws"
 	"github.com/Priyans-hu/sreq/internal/providers/consul"
@@ -44,7 +45,7 @@ func (r *Resolver) initProviders() error {
 				Paths:      providerCfg.Paths,
 			})
 			if err != nil {
-				return fmt.Errorf("failed to initialize consul provider: %w", err)
+				return sreerrors.ProviderInitFailed("Consul", err)
 			}
 			r.providers["consul"] = provider
 
@@ -55,7 +56,7 @@ func (r *Resolver) initProviders() error {
 				Paths:   providerCfg.Paths,
 			})
 			if err != nil {
-				return fmt.Errorf("failed to initialize AWS provider: %w", err)
+				return sreerrors.ProviderInitFailed("AWS Secrets Manager", err)
 			}
 			r.providers["aws"] = provider
 			r.providers["aws_secrets"] = provider // alias
@@ -82,7 +83,7 @@ func (r *Resolver) Resolve(ctx context.Context, opts ResolveOptions) (*types.Res
 	// Find service config
 	svcCfg, exists := r.config.Services[opts.Service]
 	if !exists {
-		return nil, fmt.Errorf("service '%s' not found in configuration", opts.Service)
+		return nil, sreerrors.ServiceNotFound(opts.Service)
 	}
 
 	creds := &types.ResolvedCredentials{
@@ -203,7 +204,7 @@ func (r *Resolver) resolveAdvanced(ctx context.Context, svc *types.ServiceConfig
 	for key, pathSpec := range svc.Paths {
 		value, err := r.resolvePath(ctx, pathSpec, vars)
 		if err != nil {
-			return nil, fmt.Errorf("failed to resolve '%s': %w", key, err)
+			return nil, sreerrors.PathResolutionFailed(key, err)
 		}
 
 		// Map to credential fields
@@ -240,7 +241,7 @@ func (r *Resolver) resolvePath(ctx context.Context, pathSpec string, vars map[st
 
 	provider, exists := r.providers[providerName]
 	if !exists {
-		return "", fmt.Errorf("provider '%s' not configured", providerName)
+		return "", sreerrors.ProviderNotConfigured(providerName)
 	}
 
 	// Get value
@@ -253,7 +254,7 @@ func (r *Resolver) resolvePath(ctx context.Context, pathSpec string, vars map[st
 	if parsed.JSONKey != "" {
 		value, err = extractJSONKey(value, parsed.JSONKey)
 		if err != nil {
-			return "", fmt.Errorf("failed to extract JSON key '%s': %w", parsed.JSONKey, err)
+			return "", sreerrors.JSONKeyNotFound(parsed.JSONKey, path)
 		}
 	}
 

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	sreerrors "github.com/Priyans-hu/sreq/internal/errors"
 	"github.com/Priyans-hu/sreq/pkg/types"
 	"gopkg.in/yaml.v3"
 )
@@ -39,14 +40,14 @@ func LoadFromFile(path string) (*types.Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("config file not found: %s (run 'sreq init' to create)", path)
+			return nil, sreerrors.ConfigNotFound(path)
 		}
 		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
 
 	var config types.Config
 	if err := yaml.Unmarshal(data, &config); err != nil {
-		return nil, fmt.Errorf("failed to parse config file: %w", err)
+		return nil, sreerrors.ConfigParseError(path, err)
 	}
 
 	// Initialize services map if nil
@@ -79,7 +80,7 @@ func loadServicesInto(config *types.Config, path string) error {
 	}
 
 	if err := yaml.Unmarshal(data, &servicesFile); err != nil {
-		return fmt.Errorf("failed to parse services file: %w", err)
+		return sreerrors.ConfigParseError(path, err)
 	}
 
 	// Merge services (services.yaml takes precedence for conflicts)

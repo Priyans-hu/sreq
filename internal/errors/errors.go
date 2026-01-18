@@ -165,3 +165,98 @@ func Wrap(cause error, message string) *SreqError {
 		Cause:   cause,
 	}
 }
+
+// Provider initialization errors
+func ProviderInitFailed(provider string, cause error) *SreqError {
+	return &SreqError{
+		Type:       ErrProvider,
+		Message:    fmt.Sprintf("Failed to initialize %s provider", provider),
+		Cause:      cause,
+		Suggestion: fmt.Sprintf("Check your %s provider configuration in ~/.sreq/config.yaml", provider),
+	}
+}
+
+func ConsulAddressRequired() *SreqError {
+	return &SreqError{
+		Type:       ErrConfig,
+		Message:    "Consul address is required",
+		Suggestion: "Set the address in ~/.sreq/config.yaml under providers.consul.address",
+	}
+}
+
+func ConsulKeyNotFound(key string) *SreqError {
+	return &SreqError{
+		Type:       ErrNotFound,
+		Message:    fmt.Sprintf("Key '%s' not found in Consul", key),
+		Suggestion: "Verify the key path exists in Consul KV store",
+	}
+}
+
+func ConsulGetFailed(key string, cause error) *SreqError {
+	return &SreqError{
+		Type:       ErrProvider,
+		Message:    fmt.Sprintf("Failed to get key '%s' from Consul", key),
+		Cause:      cause,
+		Suggestion: "Check that Consul is accessible and the key path is correct",
+	}
+}
+
+// Service validation errors
+func ServiceAlreadyExists(name string) *SreqError {
+	return &SreqError{
+		Type:       ErrValidation,
+		Message:    fmt.Sprintf("Service '%s' already exists", name),
+		Suggestion: fmt.Sprintf("Use 'sreq service remove %s' first to replace it", name),
+	}
+}
+
+func InvalidPathMapping(mapping string) *SreqError {
+	return &SreqError{
+		Type:       ErrValidation,
+		Message:    fmt.Sprintf("Invalid path mapping: %s", mapping),
+		Suggestion: "Use format: key=value (e.g., --path base_url=services/auth/url)",
+	}
+}
+
+func ServiceModeMixed() *SreqError {
+	return &SreqError{
+		Type:       ErrValidation,
+		Message:    "Cannot mix simple mode and advanced mode flags",
+		Suggestion: "Use either simple mode (--consul-key, --aws-prefix) or advanced mode (--path), not both",
+	}
+}
+
+func ServiceModeRequired() *SreqError {
+	return &SreqError{
+		Type:       ErrValidation,
+		Message:    "No service configuration provided",
+		Suggestion: "Specify either simple mode flags (--consul-key, --aws-prefix) or advanced mode (--path)",
+	}
+}
+
+// Resolver errors
+func PathResolutionFailed(path string, cause error) *SreqError {
+	return &SreqError{
+		Type:       ErrProvider,
+		Message:    fmt.Sprintf("Failed to resolve path '%s'", path),
+		Cause:      cause,
+		Suggestion: "Check the path template and ensure the provider is configured correctly",
+	}
+}
+
+func JSONKeyNotFound(key, source string) *SreqError {
+	return &SreqError{
+		Type:       ErrNotFound,
+		Message:    fmt.Sprintf("JSON key '%s' not found in secret", key),
+		Suggestion: fmt.Sprintf("Verify the secret contains a '%s' field. Check with: aws secretsmanager get-secret-value --secret-id %s", key, source),
+	}
+}
+
+func JSONParseFailed(cause error) *SreqError {
+	return &SreqError{
+		Type:       ErrValidation,
+		Message:    "Failed to parse JSON value",
+		Cause:      cause,
+		Suggestion: "Ensure the secret value is valid JSON format",
+	}
+}
