@@ -10,6 +10,7 @@ import (
 
 	"github.com/Priyans-hu/sreq/internal/client"
 	"github.com/Priyans-hu/sreq/internal/config"
+	sreerrors "github.com/Priyans-hu/sreq/internal/errors"
 	"github.com/Priyans-hu/sreq/internal/resolver"
 	"github.com/Priyans-hu/sreq/pkg/types"
 	"github.com/spf13/cobra"
@@ -57,11 +58,11 @@ func runRequest(cmd *cobra.Command, args []string) error {
 		"DELETE": true, "HEAD": true, "OPTIONS": true,
 	}
 	if !validMethods[method] {
-		return fmt.Errorf("invalid HTTP method: %s", method)
+		return sreerrors.InvalidMethod(method)
 	}
 
 	if serviceName == "" {
-		return fmt.Errorf("--service (-s) is required\n\nUsage: sreq run %s %s -s <service-name>", method, path)
+		return sreerrors.MissingRequiredFlag("service")
 	}
 
 	// Load configuration
@@ -93,7 +94,7 @@ func runRequest(cmd *cobra.Command, args []string) error {
 			}
 		} else if contextName != "" {
 			// Only error if user explicitly specified a context that doesn't exist
-			return fmt.Errorf("context '%s' not found in configuration", contextName)
+			return sreerrors.ContextNotFound(contextName)
 		}
 	}
 
@@ -187,7 +188,7 @@ func runRequest(cmd *cobra.Command, args []string) error {
 		App:     app,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to resolve credentials: %w", err)
+		return sreerrors.CredentialResolutionFailed(serviceName, environment, err)
 	}
 
 	if verbose {
@@ -203,7 +204,7 @@ func runRequest(cmd *cobra.Command, args []string) error {
 	}
 
 	if creds.BaseURL == "" {
-		return fmt.Errorf("could not resolve base_url for service '%s' in environment '%s'", serviceName, environment)
+		return sreerrors.BaseURLMissing(serviceName, environment)
 	}
 
 	// Create HTTP client
@@ -225,7 +226,7 @@ func runRequest(cmd *cobra.Command, args []string) error {
 	// Execute request
 	resp, err := httpClient.Do(ctx, req, creds)
 	if err != nil {
-		return fmt.Errorf("request failed: %w", err)
+		return sreerrors.RequestFailed(creds.BaseURL+path, err)
 	}
 
 	// Output response

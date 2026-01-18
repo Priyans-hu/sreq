@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	sreerrors "github.com/Priyans-hu/sreq/internal/errors"
 	"github.com/Priyans-hu/sreq/internal/providers"
 	"github.com/hashicorp/consul/api"
 )
@@ -30,7 +31,7 @@ type Config struct {
 // New creates a new Consul provider
 func New(cfg Config) (*Provider, error) {
 	if cfg.Address == "" {
-		return nil, fmt.Errorf("consul address is required")
+		return nil, sreerrors.ConsulAddressRequired()
 	}
 
 	// Resolve token from environment variable if needed
@@ -79,11 +80,11 @@ func (p *Provider) Get(ctx context.Context, key string) (string, error) {
 	// Get the value
 	pair, _, err := kv.Get(key, p.queryOptions(ctx))
 	if err != nil {
-		return "", fmt.Errorf("failed to get key '%s' from consul: %w", key, err)
+		return "", sreerrors.ConsulGetFailed(key, err)
 	}
 
 	if pair == nil {
-		return "", fmt.Errorf("key '%s' not found in consul", key)
+		return "", sreerrors.ConsulKeyNotFound(key)
 	}
 
 	return string(pair.Value), nil
