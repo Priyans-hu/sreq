@@ -11,6 +11,8 @@ var (
 	// Global flags
 	serviceName string
 	environment string
+	region      string
+	project     string
 	verbose     bool
 	dryRun      bool
 )
@@ -41,6 +43,8 @@ func Execute() error {
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&serviceName, "service", "s", "", "Service name")
 	rootCmd.PersistentFlags().StringVarP(&environment, "env", "e", "", "Environment (dev/staging/prod)")
+	rootCmd.PersistentFlags().StringVarP(&region, "region", "r", "", "Region (e.g., us-east-1)")
+	rootCmd.PersistentFlags().StringVarP(&project, "project", "p", "", "Project name")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Show what would be sent without executing")
 }

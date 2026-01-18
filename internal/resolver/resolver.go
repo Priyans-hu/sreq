@@ -59,13 +59,20 @@ func (r *Resolver) initProviders() error {
 	return nil
 }
 
-// Resolve resolves credentials for a service in a given environment
-func (r *Resolver) Resolve(ctx context.Context, serviceName, env string) (*types.ResolvedCredentials, error) {
+// ResolveOptions contains options for credential resolution
+type ResolveOptions struct {
+	Service string
+	Env     string
+	Region  string
+	Project string
+}
+
+// Resolve resolves credentials for a service with given options
+func (r *Resolver) Resolve(ctx context.Context, opts ResolveOptions) (*types.ResolvedCredentials, error) {
 	// Find service config
-	svcCfg, exists := r.config.Services[serviceName]
+	svcCfg, exists := r.config.Services[opts.Service]
 	if !exists {
-		// Try loading from services.yaml
-		return nil, fmt.Errorf("service '%s' not found in configuration", serviceName)
+		return nil, fmt.Errorf("service '%s' not found in configuration", opts.Service)
 	}
 
 	creds := &types.ResolvedCredentials{
@@ -73,17 +80,29 @@ func (r *Resolver) Resolve(ctx context.Context, serviceName, env string) (*types
 		Custom:  make(map[string]string),
 	}
 
+	// Build variables map for path resolution
+	vars := map[string]string{
+		"service": opts.Service,
+		"env":     opts.Env,
+	}
+	if opts.Region != "" {
+		vars["region"] = opts.Region
+	}
+	if opts.Project != "" {
+		vars["project"] = opts.Project
+	}
+
 	if svcCfg.IsAdvancedMode() {
 		// Advanced mode: use explicit path mappings
-		return r.resolveAdvanced(ctx, &svcCfg, env, creds)
+		return r.resolveAdvanced(ctx, &svcCfg, vars, creds)
 	}
 
 	// Simple mode: use path templates from provider config
-	return r.resolveSimple(ctx, &svcCfg, env, creds)
+	return r.resolveSimple(ctx, &svcCfg, vars, creds)
 }
 
 // resolveSimple resolves credentials using simple mode (consul_key, aws_prefix)
-func (r *Resolver) resolveSimple(ctx context.Context, svc *types.ServiceConfig, env string, creds *types.ResolvedCredentials) (*types.ResolvedCredentials, error) {
+func (r *Resolver) resolveSimple(ctx context.Context, svc *types.ServiceConfig, vars map[string]string, creds *types.ResolvedCredentials) (*types.ResolvedCredentials, error) {
 	// Get Consul provider
 	consulProvider, hasConsul := r.providers["consul"]
 
@@ -91,9 +110,12 @@ func (r *Resolver) resolveSimple(ctx context.Context, svc *types.ServiceConfig, 
 		// Get path templates from provider config
 		consulCfg := r.config.Providers["consul"]
 
+		// Add consul_key to vars for template resolution
+		vars["service"] = svc.ConsulKey
+
 		for key, template := range consulCfg.Paths {
 			// Replace placeholders
-			path := consul.ResolvePath(template, svc.ConsulKey, env)
+			path := consul.ResolvePath(template, vars)
 
 			value, err := consulProvider.Get(ctx, path)
 			if err != nil {
@@ -123,9 +145,9 @@ func (r *Resolver) resolveSimple(ctx context.Context, svc *types.ServiceConfig, 
 }
 
 // resolveAdvanced resolves credentials using advanced mode (explicit paths)
-func (r *Resolver) resolveAdvanced(ctx context.Context, svc *types.ServiceConfig, env string, creds *types.ResolvedCredentials) (*types.ResolvedCredentials, error) {
+func (r *Resolver) resolveAdvanced(ctx context.Context, svc *types.ServiceConfig, vars map[string]string, creds *types.ResolvedCredentials) (*types.ResolvedCredentials, error) {
 	for key, pathSpec := range svc.Paths {
-		value, err := r.resolvePath(ctx, pathSpec, svc.Name, env)
+		value, err := r.resolvePath(ctx, pathSpec, vars)
 		if err != nil {
 			return nil, fmt.Errorf("failed to resolve '%s': %w", key, err)
 		}
@@ -150,11 +172,11 @@ func (r *Resolver) resolveAdvanced(ctx context.Context, svc *types.ServiceConfig
 
 // resolvePath resolves a single path specification
 // Format: [provider:]path[#jsonkey]
-func (r *Resolver) resolvePath(ctx context.Context, pathSpec, service, env string) (string, error) {
+func (r *Resolver) resolvePath(ctx context.Context, pathSpec string, vars map[string]string) (string, error) {
 	parsed := parsePath(pathSpec)
 
 	// Replace placeholders in path
-	path := consul.ResolvePath(parsed.Path, service, env)
+	path := consul.ResolvePath(parsed.Path, vars)
 
 	// Get provider (default to consul)
 	providerName := parsed.Provider

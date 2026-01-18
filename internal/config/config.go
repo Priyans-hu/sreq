@@ -134,13 +134,20 @@ func GetConfigDir() (string, error) {
 var defaultConfig = `# sreq configuration
 # Documentation: https://github.com/Priyans-hu/sreq
 
+# Available placeholders in paths:
+#   {service} - Service name (from -s flag or consul_key)
+#   {env}     - Environment (from -e flag)
+#   {region}  - Region (from -r flag)
+#   {project} - Project name (from -p flag)
+
 providers:
   consul:
     address: localhost:8500
     # token: ${CONSUL_TOKEN}
+    # datacenter: us-east-1
     paths:
-      base_url: "services/{service}/config/base_url"
-      username: "services/{service}/config/username"
+      base_url: "{project}/{env}/{service}/{region}/config/base_url"
+      username: "{project}/{env}/{service}/{region}/config/username"
 
   aws_secrets:
     region: us-east-1

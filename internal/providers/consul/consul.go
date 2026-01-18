@@ -105,9 +105,9 @@ func (p *Provider) GetMultiple(ctx context.Context, keys []string) (map[string]s
 }
 
 // GetWithTemplate retrieves a value using a path template
-// Supports placeholders: {service}, {env}
-func (p *Provider) GetWithTemplate(ctx context.Context, template, service, env string) (string, error) {
-	key := ResolvePath(template, service, env)
+// Supports placeholders: {service}, {env}, {region}, {project}
+func (p *Provider) GetWithTemplate(ctx context.Context, template string, vars map[string]string) (string, error) {
+	key := ResolvePath(template, vars)
 	return p.Get(ctx, key)
 }
 
@@ -142,12 +142,21 @@ func (p *Provider) queryOptions(ctx context.Context) *api.QueryOptions {
 }
 
 // ResolvePath replaces placeholders in a path template
-// Placeholders: {service}, {env}
-func ResolvePath(template, service, env string) string {
+// Placeholders: {service}, {env}, {region}, {project}
+func ResolvePath(template string, vars map[string]string) string {
 	result := template
-	result = strings.ReplaceAll(result, "{service}", service)
-	result = strings.ReplaceAll(result, "{env}", env)
+	for key, value := range vars {
+		result = strings.ReplaceAll(result, "{"+key+"}", value)
+	}
 	return result
+}
+
+// ResolvePathSimple is a convenience function for basic service/env resolution
+func ResolvePathSimple(template, service, env string) string {
+	return ResolvePath(template, map[string]string{
+		"service": service,
+		"env":     env,
+	})
 }
 
 // Ensure Provider implements the interface

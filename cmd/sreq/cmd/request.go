@@ -103,6 +103,12 @@ func runRequest(cmd *cobra.Command, args []string) error {
 		fmt.Println("Request Details:")
 		fmt.Printf("  Service:     %s\n", serviceName)
 		fmt.Printf("  Environment: %s\n", environment)
+		if region != "" {
+			fmt.Printf("  Region:      %s\n", region)
+		}
+		if project != "" {
+			fmt.Printf("  Project:     %s\n", project)
+		}
 		fmt.Printf("  Method:      %s\n", method)
 		fmt.Printf("  Path:        %s\n", path)
 		if len(headers) > 0 {
@@ -140,7 +146,12 @@ func runRequest(cmd *cobra.Command, args []string) error {
 		fmt.Println("Resolving credentials...")
 	}
 
-	creds, err := res.Resolve(ctx, serviceName, environment)
+	creds, err := res.Resolve(ctx, resolver.ResolveOptions{
+		Service: serviceName,
+		Env:     environment,
+		Region:  region,
+		Project: project,
+	})
 	if err != nil {
 		return fmt.Errorf("failed to resolve credentials: %w", err)
 	}
