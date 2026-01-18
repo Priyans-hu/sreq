@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Priyans-hu/sreq/internal/providers"
+	"github.com/Priyans-hu/sreq/internal/providers/aws"
 	"github.com/Priyans-hu/sreq/internal/providers/consul"
 	"github.com/Priyans-hu/sreq/pkg/types"
 )
@@ -48,8 +49,16 @@ func (r *Resolver) initProviders() error {
 			r.providers["consul"] = provider
 
 		case "aws_secrets", "aws":
-			// TODO: Initialize AWS provider when implemented
-			// For now, skip silently
+			provider, err := aws.New(aws.Config{
+				Region:  providerCfg.Region,
+				Profile: providerCfg.Profile,
+				Paths:   providerCfg.Paths,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to initialize AWS provider: %w", err)
+			}
+			r.providers["aws"] = provider
+			r.providers["aws_secrets"] = provider // alias
 
 		default:
 			// Unknown provider, skip
@@ -143,7 +152,48 @@ func (r *Resolver) resolveSimple(ctx context.Context, svc *types.ServiceConfig, 
 		}
 	}
 
-	// TODO: Add AWS provider resolution for simple mode
+	// Get AWS provider
+	awsProvider, hasAWS := r.providers["aws"]
+
+	if hasAWS && svc.AWSPrefix != "" {
+		// Get path templates from provider config
+		awsCfg := r.config.Providers["aws_secrets"]
+		if awsCfg.Paths == nil {
+			awsCfg = r.config.Providers["aws"]
+		}
+
+		// Add aws_prefix to vars for template resolution
+		vars["service"] = svc.AWSPrefix
+
+		for key, template := range awsCfg.Paths {
+			// Replace placeholders
+			path := aws.ResolvePath(template, vars)
+
+			value, err := awsProvider.Get(ctx, path)
+			if err != nil {
+				// Log warning but continue - not all keys may exist
+				continue
+			}
+
+			// Map to credential fields (AWS typically provides password/api_key)
+			switch key {
+			case "base_url":
+				if creds.BaseURL == "" {
+					creds.BaseURL = value
+				}
+			case "username":
+				if creds.Username == "" {
+					creds.Username = value
+				}
+			case "password":
+				creds.Password = value
+			case "api_key":
+				creds.APIKey = value
+			default:
+				creds.Custom[key] = value
+			}
+		}
+	}
 
 	return creds, nil
 }
