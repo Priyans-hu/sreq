@@ -92,10 +92,11 @@ __debug_bin*
 tmp/
 temp/
 
-# Local notes (not for repo)
+# Local notes & tracking (not for repo)
 .brainstorm.md
 .notes.md
 .todo.md
+.todos.md
 TODO.local.md
 
 # Archives
