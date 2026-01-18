@@ -49,7 +49,46 @@ func LoadFromFile(path string) (*types.Config, error) {
 		return nil, fmt.Errorf("failed to parse config file: %w", err)
 	}
 
+	// Initialize services map if nil
+	if config.Services == nil {
+		config.Services = make(map[string]types.ServiceConfig)
+	}
+
+	// Load additional services from services.yaml
+	configDir := filepath.Dir(path)
+	servicesPath := filepath.Join(configDir, DefaultServicesFile)
+	if err := loadServicesInto(&config, servicesPath); err != nil {
+		// Ignore if services file doesn't exist
+		if !os.IsNotExist(err) {
+			return nil, err
+		}
+	}
+
 	return &config, nil
+}
+
+// loadServicesInto loads services from services.yaml into the config
+func loadServicesInto(config *types.Config, path string) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	var servicesFile struct {
+		Services map[string]types.ServiceConfig `yaml:"services"`
+	}
+
+	if err := yaml.Unmarshal(data, &servicesFile); err != nil {
+		return fmt.Errorf("failed to parse services file: %w", err)
+	}
+
+	// Merge services (services.yaml takes precedence for conflicts)
+	for name, svc := range servicesFile.Services {
+		svc.Name = name
+		config.Services[name] = svc
+	}
+
+	return nil
 }
 
 // Init creates the default configuration files
