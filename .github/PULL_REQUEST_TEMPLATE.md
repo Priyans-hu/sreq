@@ -1,48 +1,38 @@
 ## Summary
-
-Brief description of the changes in this PR.
-
-## Related Issue
-
-Fixes #(issue number)
+<!-- Brief description of what this PR does -->
 
 ## Type of Change
+<!-- Mark the relevant option with an "x" -->
 
 - [ ] Bug fix (non-breaking change that fixes an issue)
 - [ ] New feature (non-breaking change that adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] Breaking change (fix or feature that would cause existing functionality to change)
 - [ ] Documentation update
 - [ ] Refactoring (no functional changes)
-- [ ] Tests (adding or updating tests)
+- [ ] CI/CD or tooling changes
+
+## Related Issues
+<!-- Link any related issues: Fixes #123, Closes #456 -->
 
 ## Changes Made
+<!-- List the specific changes in this PR -->
 
-- Change 1
-- Change 2
-- Change 3
+- 
+- 
+- 
 
 ## Testing
+<!-- How was this tested? -->
 
-Describe how you tested these changes:
-
-- [ ] Unit tests pass (`go test ./...`)
-- [ ] Manual testing performed
-- [ ] New tests added for new functionality
+- [ ] Added/updated unit tests
+- [ ] Tested manually
+- [ ] Existing tests pass (`go test ./...`)
+- [ ] Linter passes (`golangci-lint run`)
 
 ## Checklist
+<!-- Mark completed items with an "x" -->
 
-- [ ] My code follows the project's style guidelines
-- [ ] I have performed a self-review of my code
-- [ ] I have commented my code where necessary
+- [ ] My code follows the project's code style
 - [ ] I have updated documentation if needed
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix/feature works
-- [ ] New and existing unit tests pass locally
-
-## Screenshots (if applicable)
-
-Add screenshots to help explain your changes.
-
-## Additional Notes
-
-Any additional information reviewers should know.
+- [ ] I have added tests for new functionality
+- [ ] All new and existing tests pass
