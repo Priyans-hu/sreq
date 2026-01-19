@@ -343,6 +343,10 @@ sreq tui
 # Test providers
 sreq auth test consul
 sreq auth test aws
+
+# Upgrade to latest version
+sreq upgrade
+sreq upgrade --force    # Force even if on latest
 ```
 
 ## For AI Agents
