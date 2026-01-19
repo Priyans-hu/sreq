@@ -44,6 +44,7 @@ Always include timestamps in ISO format:
 2. Add any follow-up tasks discovered
 3. Update `.brainstorm.md` if new ideas emerged
 4. Update `docs/ROADMAP.md` if milestone completed (this one is committed)
+5. Update `docs/SETUP.md` if relevant (see Documentation Maintenance below)
 
 ### When Planning
 1. Add ideas to `.brainstorm.md` with timestamp
@@ -67,6 +68,30 @@ sreq/
     ├── .brainstorm.md
     └── .notes.md
 ```
+
+## Documentation Maintenance
+
+**IMPORTANT:** Keep these docs updated when making relevant changes.
+
+### `docs/SETUP.md` - Update when:
+| Change Type | What to Update |
+|-------------|----------------|
+| New provider (Azure, Vault, etc.) | Add to Optional prerequisites, provider config examples, troubleshooting |
+| New command | Add to Quick Reference section |
+| New environment variable | Add to Environment Variables table |
+| Config format change | Update configuration examples |
+| New installation method | Update Installation section |
+| Release/binary changes | Update download URLs if naming changes |
+
+### `docs/ROADMAP.md` - Update when:
+- Feature milestone completed
+- New features planned
+- Priorities change
+
+### `README.md` - Update when:
+- Major new features added
+- Installation method changes
+- Quick start examples need updating
 
 ## Code Style
 
