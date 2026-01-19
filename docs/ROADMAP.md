@@ -4,6 +4,8 @@ Detailed planning and feature specifications for sreq.
 
 ## Current Status
 
+**Latest Release:** v0.1.0 (2026-01-19)
+
 - [x] Project setup
 - [x] Core CLI structure (Cobra)
 - [x] Consul provider (with env-specific addresses)
@@ -13,6 +15,10 @@ Detailed planning and feature specifications for sreq.
 - [x] Config file management
 - [x] Interactive auth setup (`sreq auth`)
 - [x] Error messages with suggestions
+- [x] Request history with replay and export
+- [x] TUI mode (Bubble Tea)
+- [x] Encrypted credential caching
+- [x] Automated releases (GitHub Actions + GoReleaser)
 
 ## Planned Features
 
@@ -25,7 +31,7 @@ Detailed planning and feature specifications for sreq.
 - [x] YAML configuration management
 - [x] Context support (presets for project/env/region/app)
 
-### Phase 2: Request History & TUI
+### Phase 2: Request History & TUI ✅
 
 #### Request History
 
@@ -56,7 +62,7 @@ Features:
 - History browser with replay support
 - Keyboard shortcuts for common actions
 
-### Phase 3: Credential Caching
+### Phase 3: Credential Caching ✅
 
 Cache credentials locally for faster requests and offline use.
 
@@ -139,11 +145,12 @@ providers:
 
 #### Package Managers
 
-```bash
-brew install sreq        # Homebrew (macOS/Linux)
-go install github.com/Priyans-hu/sreq@latest  # Go
-scoop install sreq       # Scoop (Windows)
-```
+| Method | Status | Command |
+|--------|--------|---------|
+| Binary download | ✅ Available | [Releases page](https://github.com/Priyans-hu/sreq/releases) |
+| Go install | ✅ Available | `go install github.com/Priyans-hu/sreq/cmd/sreq@latest` |
+| Homebrew | 🔜 Coming | `brew tap Priyans-hu/tap && brew install sreq` |
+| Scoop | Planned | `scoop install sreq` |
 
 ### Phase 6: Advanced Features
 
