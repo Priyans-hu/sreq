@@ -134,7 +134,7 @@ func TestProvider_getAddressForEnv(t *testing.T) {
 			expected: "consul.default:8500",
 		},
 		{
-			name:           "plivo use case - nonprod default, prod separate",
+			name:           "nonprod default, prod separate",
 			defaultAddress: "consul-nonprod.internal:8500",
 			envAddresses: map[string]string{
 				"prod": "consul-prod.internal:8500",

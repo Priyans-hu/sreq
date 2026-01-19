@@ -6,23 +6,97 @@ Detailed planning and feature specifications for sreq.
 
 - [x] Project setup
 - [x] Core CLI structure (Cobra)
-- [ ] Consul provider
-- [ ] AWS Secrets Manager provider
-- [ ] HTTP client with auth
-- [ ] Environment switching
-- [ ] Config file management
+- [x] Consul provider (with env-specific addresses)
+- [x] AWS Secrets Manager provider
+- [x] HTTP client with auth
+- [x] Environment switching
+- [x] Config file management
+- [x] Interactive auth setup (`sreq auth`)
+- [x] Error messages with suggestions
 
 ## Planned Features
 
-### Phase 1: Core Functionality
+### Phase 1: Core Functionality ✅
 
-- Consul KV provider
-- AWS Secrets Manager provider
-- HTTP client with Basic Auth and API key support
-- Environment switching (dev/staging/prod)
-- YAML configuration management
+- [x] Consul KV provider
+- [x] AWS Secrets Manager provider
+- [x] HTTP client with Basic Auth and API key support
+- [x] Environment switching (dev/staging/prod)
+- [x] YAML configuration management
+- [x] Context support (presets for project/env/region/app)
 
-### Phase 2: Enhanced Providers
+### Phase 2: Request History & TUI
+
+#### Request History
+
+Save and replay previous requests:
+
+```bash
+sreq history                    # List recent requests (last 20)
+sreq history --all              # List all
+sreq history --service auth     # Filter by service
+sreq history --env prod         # Filter by env
+sreq history 5                  # Show details of request #5
+sreq history 5 --replay         # Replay request #5
+sreq history 5 --curl           # Export as curl command
+sreq history --clear            # Clear all history
+```
+
+#### TUI Mode (Bubble Tea)
+
+Interactive terminal UI for building and executing requests.
+
+```bash
+sreq tui
+```
+
+Features:
+- Dashboard with service list and recent requests
+- Request builder with dropdowns for service/env/method
+- History browser with replay support
+- Keyboard shortcuts for common actions
+
+### Phase 3: Credential Caching
+
+Cache credentials locally for faster requests and offline use.
+
+**Commands:**
+```bash
+sreq sync dev              # Sync credentials for an environment
+sreq sync --all            # Sync all environments
+sreq sync --force          # Force refresh ignoring TTL
+sreq cache status          # Show cache status
+sreq cache clear           # Clear all cache
+```
+
+**Security measures:**
+- AES-256-GCM encryption with user-specific key
+- File permissions `600` (owner read/write only)
+- Configurable TTL (default: 1 hour)
+- Environment variable to disable caching: `SREQ_NO_CACHE=1`
+- Auto-disable in CI/CD detection (`CI=true`)
+
+### Phase 4: Additional Providers
+
+#### Priority Providers
+
+| Provider | Status | Notes |
+|----------|--------|-------|
+| Environment Variables | Planned | Essential for local dev/CI |
+| HashiCorp Vault | Planned | Enterprise demand, KV v2 API |
+| dotenv files | Planned | Parse local `.env` files |
+| GCP Secret Manager | Planned | Complete cloud trifecta |
+| Azure Key Vault | Planned | Complete cloud trifecta |
+
+#### Environment Variable Provider
+
+```yaml
+providers:
+  env:
+    paths:
+      api_key: "{SERVICE}_API_KEY"
+      password: "{SERVICE}_{ENV}_PASSWORD"
+```
 
 #### HashiCorp Vault Provider
 
@@ -35,92 +109,72 @@ providers:
       password: "secret/data/{service}/{env}#password"
 ```
 
-#### Environment Variable Provider
-
-For local development or CI/CD where secrets are in env vars:
+#### dotenv Provider
 
 ```yaml
 providers:
-  env:
+  dotenv:
+    file: .env.local
     paths:
       api_key: "{SERVICE}_API_KEY"
-      password: "{SERVICE}_{ENV}_PASSWORD"
 ```
 
-### Phase 3: Credential Caching
+### Phase 5: Integrations & Export
 
-Cache credentials locally for faster requests and offline use.
+#### Export Formats
 
-**Commands:**
-```bash
-# Sync credentials for an environment
-sreq sync dev
+| Format | Status | Notes |
+|--------|--------|-------|
+| curl | Planned | `sreq history 5 --curl` |
+| HTTPie | Planned | `sreq history 5 --httpie` |
+| Bruno | Planned | `sreq export bruno ./collection` |
+| Postman | Future | Collection v2.1 format |
 
-# Sync all environments
-sreq sync --all
+#### CI/CD Integration
 
-# Use cached credentials (offline mode)
-sreq GET /api/v1/users -s auth-service --offline
-```
+| Platform | Status | Notes |
+|----------|--------|-------|
+| GitHub Actions | Planned | Action to run sreq in workflows |
+| GitLab CI | Future | Template for .gitlab-ci.yml |
 
-**Cache location:** `~/.sreq/cache/{env}/{service}.json`
-
-**Security measures:**
-- File permissions `600` (owner read/write only)
-- Optional encryption with machine key
-- Configurable TTL (default: 1 hour)
-- Environment variable to disable caching in CI/CD
-
-**Cache structure:**
-```
-~/.sreq/
-├── config.yaml
-└── cache/
-    ├── dev/
-    │   ├── auth-service.json
-    │   └── billing-service.json
-    └── staging/
-        └── auth-service.json
-```
-
-### Phase 4: Developer Experience
-
-#### Request History
-
-Save and replay previous requests:
+#### Package Managers
 
 ```bash
-sreq history           # List recent requests
-sreq history 5         # Replay request #5
-sreq history --clear   # Clear history
+brew install sreq        # Homebrew (macOS/Linux)
+go install github.com/Priyans-hu/sreq@latest  # Go
+scoop install sreq       # Scoop (Windows)
 ```
 
-#### TUI Mode (Bubble Tea)
+### Phase 6: Advanced Features
 
-Interactive terminal UI for building and executing requests.
+- **Auto-Discovery**: `sreq discover consul` - List keys in providers
+- **Import**: `sreq import consul billing_service --as billing` - Auto-generate service config
+- **Collections**: Group related requests together
+- **Response filtering**: jq-style filtering (`--filter '.data[0].name'`)
+- **Metrics/timing**: `--timing` flag for DNS/TLS/TTFB breakdown
+- **Retry with backoff**: Auto-retry failed requests
+- **Proxy support**: HTTP/SOCKS proxy configuration
 
-```bash
-sreq tui
-```
+## Future Provider Ideas
 
-### Phase 5: Integrations
+These are potential providers we may support based on demand:
 
-#### Homebrew Formula
-
-```bash
-brew install sreq
-```
-
-#### Bruno Extension
-
-Export sreq configs to Bruno collections, or extend Bruno with sreq's credential resolution.
+| Provider | Complexity | Notes |
+|----------|------------|-------|
+| AWS Parameter Store | Low | Already have AWS SDK |
+| Doppler | Low | REST API, popular for startups |
+| Infisical | Low | Open-source, REST API |
+| 1Password | Medium | CLI (`op`) or Connect API |
+| Kubernetes Secrets | Medium | client-go library |
+| etcd | Low | Similar to Consul KV |
+| SOPS | Low | Encrypted YAML/JSON files |
+| CyberArk Conjur | High | Enterprise, complex setup |
 
 ## Ideas / Backlog
 
-- Response formatting (JSON pretty-print, jq-style filtering)
-- Request templates
-- Collection support (group related requests)
+- Request templates with variables
 - Team config sharing via git
-- Metrics/timing output
-- Retry with backoff
-- Proxy support
+- VS Code extension
+- JetBrains plugin
+- fzf integration for fuzzy selection
+- direnv integration for per-directory contexts

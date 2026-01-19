@@ -63,7 +63,7 @@ func TestProviderConfig_GetAddressForEnv(t *testing.T) {
 			expected: "consul-nonprod:8500",
 		},
 		{
-			name: "plivo use case - nonprod default, prod override",
+			name: "nonprod default, prod override",
 			config: ProviderConfig{
 				Address: "consul-nonprod.internal:8500",
 				EnvAddresses: map[string]string{
