@@ -106,7 +106,7 @@ func (c *Cache) Get(service, env string) (*types.ResolvedCredentials, error) {
 	plaintext, err := Decrypt(c.key, ciphertext)
 	if err != nil {
 		// Corrupted cache, remove it
-		os.Remove(path)
+		_ = os.Remove(path)
 		return nil, nil
 	}
 
@@ -114,13 +114,13 @@ func (c *Cache) Get(service, env string) (*types.ResolvedCredentials, error) {
 	var entry Entry
 	if err := json.Unmarshal(plaintext, &entry); err != nil {
 		// Corrupted cache, remove it
-		os.Remove(path)
+		_ = os.Remove(path)
 		return nil, nil
 	}
 
 	// Check expiry
 	if entry.IsExpired() {
-		os.Remove(path)
+		_ = os.Remove(path)
 		return nil, nil
 	}
 

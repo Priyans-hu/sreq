@@ -18,11 +18,11 @@ func setupTestCache(t *testing.T) (*Cache, string) {
 	// Generate and save key
 	key, err := GenerateKey()
 	if err != nil {
-		os.RemoveAll(tmpDir)
+		_ = os.RemoveAll(tmpDir)
 		t.Fatal(err)
 	}
 	if err := SaveKey(tmpDir, key); err != nil {
-		os.RemoveAll(tmpDir)
+		_ = os.RemoveAll(tmpDir)
 		t.Fatal(err)
 	}
 
@@ -31,7 +31,7 @@ func setupTestCache(t *testing.T) (*Cache, string) {
 		TTL:       1 * time.Hour,
 	})
 	if err != nil {
-		os.RemoveAll(tmpDir)
+		_ = os.RemoveAll(tmpDir)
 		t.Fatal(err)
 	}
 
@@ -40,7 +40,7 @@ func setupTestCache(t *testing.T) (*Cache, string) {
 
 func TestCache_SetAndGet(t *testing.T) {
 	c, tmpDir := setupTestCache(t)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	creds := &types.ResolvedCredentials{
 		BaseURL:  "https://api.example.com",
@@ -76,7 +76,7 @@ func TestCache_SetAndGet(t *testing.T) {
 
 func TestCache_CacheMiss(t *testing.T) {
 	c, tmpDir := setupTestCache(t)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Get non-existent entry
 	got, err := c.Get("nonexistent", "dev")
@@ -93,11 +93,11 @@ func TestCache_Expiry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Generate and save key
 	key, _ := GenerateKey()
-	SaveKey(tmpDir, key)
+	_ = SaveKey(tmpDir, key)
 
 	// Create cache with very short TTL
 	c, err := New(Config{
@@ -132,14 +132,14 @@ func TestCache_Expiry(t *testing.T) {
 
 func TestCache_Delete(t *testing.T) {
 	c, tmpDir := setupTestCache(t)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	creds := &types.ResolvedCredentials{
 		BaseURL: "https://api.example.com",
 	}
 
 	// Set
-	c.Set("auth-service", "dev", creds)
+	_ = c.Set("auth-service", "dev", creds)
 
 	// Delete
 	if err := c.Delete("auth-service", "dev"); err != nil {
@@ -155,16 +155,16 @@ func TestCache_Delete(t *testing.T) {
 
 func TestCache_Clear(t *testing.T) {
 	c, tmpDir := setupTestCache(t)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	creds := &types.ResolvedCredentials{
 		BaseURL: "https://api.example.com",
 	}
 
 	// Set multiple
-	c.Set("auth-service", "dev", creds)
-	c.Set("billing-service", "dev", creds)
-	c.Set("auth-service", "prod", creds)
+	_ = c.Set("auth-service", "dev", creds)
+	_ = c.Set("billing-service", "dev", creds)
+	_ = c.Set("auth-service", "prod", creds)
 
 	// Clear all
 	if err := c.Clear(); err != nil {
@@ -184,15 +184,15 @@ func TestCache_Clear(t *testing.T) {
 
 func TestCache_ClearEnv(t *testing.T) {
 	c, tmpDir := setupTestCache(t)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	creds := &types.ResolvedCredentials{
 		BaseURL: "https://api.example.com",
 	}
 
 	// Set for different envs
-	c.Set("auth-service", "dev", creds)
-	c.Set("auth-service", "prod", creds)
+	_ = c.Set("auth-service", "dev", creds)
+	_ = c.Set("auth-service", "prod", creds)
 
 	// Clear only dev
 	if err := c.ClearEnv("dev"); err != nil {
@@ -214,14 +214,14 @@ func TestCache_ClearEnv(t *testing.T) {
 
 func TestCache_Status(t *testing.T) {
 	c, tmpDir := setupTestCache(t)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	creds := &types.ResolvedCredentials{
 		BaseURL: "https://api.example.com",
 	}
 
-	c.Set("auth-service", "dev", creds)
-	c.Set("billing-service", "dev", creds)
+	_ = c.Set("auth-service", "dev", creds)
+	_ = c.Set("billing-service", "dev", creds)
 
 	status, err := c.Status()
 	if err != nil {
@@ -283,7 +283,7 @@ func TestKeyExists(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Should not exist initially
 	if KeyExists(tmpDir) {
@@ -292,7 +292,7 @@ func TestKeyExists(t *testing.T) {
 
 	// Generate and save key
 	key, _ := GenerateKey()
-	SaveKey(tmpDir, key)
+	_ = SaveKey(tmpDir, key)
 
 	// Should exist now
 	if !KeyExists(tmpDir) {
@@ -305,7 +305,7 @@ func TestLoadKey_NotFound(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	_, err = LoadKey(tmpDir)
 	if err == nil {
@@ -314,31 +314,31 @@ func TestLoadKey_NotFound(t *testing.T) {
 }
 
 func TestIsDisabled(t *testing.T) {
-	// Save original values
+	// Save original values and restore after test
 	origNoCache := os.Getenv("SREQ_NO_CACHE")
 	origCI := os.Getenv("CI")
 	defer func() {
-		os.Setenv("SREQ_NO_CACHE", origNoCache)
-		os.Setenv("CI", origCI)
+		_ = os.Setenv("SREQ_NO_CACHE", origNoCache)
+		_ = os.Setenv("CI", origCI)
 	}()
 
 	// Clear env vars
-	os.Unsetenv("SREQ_NO_CACHE")
-	os.Unsetenv("CI")
+	_ = os.Unsetenv("SREQ_NO_CACHE")
+	_ = os.Unsetenv("CI")
 
 	if IsDisabled() {
 		t.Error("Should not be disabled when env vars are not set")
 	}
 
 	// Test SREQ_NO_CACHE
-	os.Setenv("SREQ_NO_CACHE", "1")
+	_ = os.Setenv("SREQ_NO_CACHE", "1")
 	if !IsDisabled() {
 		t.Error("Should be disabled when SREQ_NO_CACHE=1")
 	}
-	os.Unsetenv("SREQ_NO_CACHE")
+	_ = os.Unsetenv("SREQ_NO_CACHE")
 
 	// Test CI=true
-	os.Setenv("CI", "true")
+	_ = os.Setenv("CI", "true")
 	if !IsDisabled() {
 		t.Error("Should be disabled when CI=true")
 	}
@@ -366,13 +366,13 @@ func TestEntry_IsExpired(t *testing.T) {
 
 func TestCacheFilePermissions(t *testing.T) {
 	c, tmpDir := setupTestCache(t)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	creds := &types.ResolvedCredentials{
 		BaseURL: "https://api.example.com",
 	}
 
-	c.Set("auth-service", "dev", creds)
+	_ = c.Set("auth-service", "dev", creds)
 
 	// Check file permissions
 	cacheFile := filepath.Join(tmpDir, "cache", "dev", "auth-service-dev.enc")

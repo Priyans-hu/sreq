@@ -13,7 +13,7 @@ func TestHistory_AddAndGet(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	h, err := New(tmpDir)
 	if err != nil {
@@ -49,7 +49,7 @@ func TestHistory_List(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	h, err := New(tmpDir)
 	if err != nil {
@@ -97,7 +97,7 @@ func TestHistory_Clear(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	h, err := New(tmpDir)
 	if err != nil {
@@ -124,7 +124,7 @@ func TestHistory_ClearBefore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	h, err := New(tmpDir)
 	if err != nil {
@@ -161,7 +161,7 @@ func TestHistory_SaveAndLoad(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Create and save
 	h1, err := New(tmpDir)
@@ -198,7 +198,7 @@ func TestHistory_MaxEntries(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	h, err := New(tmpDir)
 	if err != nil {

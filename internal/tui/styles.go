@@ -9,7 +9,6 @@ var (
 	warningColor   = lipgloss.Color("#F59E0B") // Yellow
 	errorColor     = lipgloss.Color("#EF4444") // Red
 	mutedColor     = lipgloss.Color("#6B7280") // Gray
-	bgColor        = lipgloss.Color("#1F2937") // Dark gray
 
 	// Styles
 	titleStyle = lipgloss.NewStyle().
@@ -20,11 +19,6 @@ var (
 	subtitleStyle = lipgloss.NewStyle().
 			Foreground(mutedColor).
 			Italic(true)
-
-	selectedStyle = lipgloss.NewStyle().
-			Background(primaryColor).
-			Foreground(lipgloss.Color("#FFFFFF")).
-			Bold(true)
 
 	normalStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#FFFFFF"))
@@ -40,11 +34,6 @@ var (
 
 	errorStyle = lipgloss.NewStyle().
 			Foreground(errorColor)
-
-	boxStyle = lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(primaryColor).
-			Padding(0, 1)
 
 	helpStyle = lipgloss.NewStyle().
 			Foreground(mutedColor).

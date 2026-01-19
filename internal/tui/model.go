@@ -40,9 +40,6 @@ type Model struct {
 	// Dimensions
 	width  int
 	height int
-
-	// Error state
-	err error
 }
 
 // serviceItem implements list.Item for services
@@ -245,10 +242,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.handleEnter()
 
 		case key.Matches(msg, keys.Curl):
-			if m.selectedHistory != nil {
-				// In a real app, we'd copy to clipboard
-				// For now, just show a message
-			}
+			// Copy to clipboard functionality would go here
+			// For now, this is a placeholder for future implementation
 			return m, nil
 		}
 	}
