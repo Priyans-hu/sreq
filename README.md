@@ -1,5 +1,10 @@
 # sreq
 
+[![CI](https://github.com/Priyans-hu/sreq/actions/workflows/ci.yml/badge.svg)](https://github.com/Priyans-hu/sreq/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/Priyans-hu/sreq/graph/badge.svg)](https://codecov.io/gh/Priyans-hu/sreq)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Priyans-hu/sreq)](https://goreportcard.com/report/github.com/Priyans-hu/sreq)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 **Service-aware API client with automatic credential resolution.**
 
 sreq eliminates the overhead of manually fetching credentials from multiple sources when testing APIs. Just specify the service name and environment — sreq handles the rest.
