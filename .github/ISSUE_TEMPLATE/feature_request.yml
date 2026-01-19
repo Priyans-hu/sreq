@@ -1,0 +1,79 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please describe what you'd like to see.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature category
+      options:
+        - New provider (Vault, Azure, GCP, etc.)
+        - New command
+        - CLI improvement
+        - Configuration
+        - Performance
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What problem does this solve? Why do you need this?
+      placeholder: |
+        I need to fetch credentials from HashiCorp Vault, but sreq only supports Consul and AWS...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How do you think this should work?
+      placeholder: |
+        Add a Vault provider that supports:
+        - KV secrets engine v2
+        - Token and AppRole authentication
+        - Path templates like `secret/data/{service}/{env}`
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds or alternative approaches you've considered?
+      placeholder: |
+        I could use a wrapper script to fetch from Vault first, but native support would be cleaner...
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Example configuration (if applicable)
+      description: How might this look in config.yaml?
+      render: yaml
+      placeholder: |
+        providers:
+          vault:
+            address: "https://vault.internal:8200"
+            auth_method: approle
+        services:
+          my-service:
+            environments:
+              prod:
+                provider: vault
+                path: "secret/data/my-service/prod"
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I'm willing to submit a PR for this feature
