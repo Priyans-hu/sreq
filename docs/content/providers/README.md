@@ -14,9 +14,11 @@ Providers are the sources from which sreq fetches credentials. Each provider con
 |----------|--------|-------------|
 | [Consul KV](/sreq/providers/consul) | Available | HashiCorp Consul Key-Value store |
 | [AWS Secrets Manager](/sreq/providers/aws) | Available | AWS Secrets Manager |
+| [Environment Variables](/sreq/providers/env) | Available | System environment variables |
+| [dotenv](/sreq/providers/dotenv) | Available | Local `.env` files |
 | HashiCorp Vault | Planned | HashiCorp Vault KV secrets |
-| Environment Variables | Planned | Local environment variables |
-| dotenv | Planned | Local `.env` files |
+| GCP Secret Manager | Planned | Google Cloud Secret Manager |
+| Azure Key Vault | Planned | Azure Key Vault |
 
 ## How Providers Work
 
@@ -97,3 +99,5 @@ See the [Contributing Guide](https://github.com/Priyans-hu/sreq/blob/main/CONTRI
 
 - [Consul Provider](/sreq/providers/consul) — Setup and configuration
 - [AWS Provider](/sreq/providers/aws) — Setup and configuration
+- [Environment Variables](/sreq/providers/env) — Read from system env vars
+- [dotenv Provider](/sreq/providers/dotenv) — Read from .env files

@@ -9,6 +9,8 @@ import (
 	"github.com/Priyans-hu/sreq/internal/providers"
 	"github.com/Priyans-hu/sreq/internal/providers/aws"
 	"github.com/Priyans-hu/sreq/internal/providers/consul"
+	"github.com/Priyans-hu/sreq/internal/providers/dotenv"
+	"github.com/Priyans-hu/sreq/internal/providers/env"
 	"github.com/Priyans-hu/sreq/pkg/types"
 )
 
@@ -61,6 +63,27 @@ func (r *Resolver) initProviders() error {
 			}
 			r.providers["aws"] = provider
 			r.providers["aws_secrets"] = provider // alias
+
+		case "env":
+			provider, err := env.New(env.Config{
+				Prefix: providerCfg.Prefix,
+				Paths:  providerCfg.Paths,
+			})
+			if err != nil {
+				return sreerrors.ProviderInitFailed("Environment Variables", err)
+			}
+			r.providers["env"] = provider
+
+		case "dotenv":
+			provider, err := dotenv.New(dotenv.Config{
+				File:  providerCfg.File,
+				Files: providerCfg.Files,
+				Paths: providerCfg.Paths,
+			})
+			if err != nil {
+				return sreerrors.ProviderInitFailed("dotenv", err)
+			}
+			r.providers["dotenv"] = provider
 
 		default:
 			// Unknown provider, skip
