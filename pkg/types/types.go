@@ -58,6 +58,16 @@ type ProviderConfig struct {
 	// Default path templates for simple mode
 	// Use {service} and {env} as placeholders
 	Paths map[string]string `yaml:"paths,omitempty"`
+
+	// Env provider: prefix for environment variables (e.g., "SREQ_")
+	Prefix string `yaml:"prefix,omitempty"`
+
+	// Dotenv provider: single file path (for backward compatibility)
+	File string `yaml:"file,omitempty"`
+
+	// Dotenv provider: list of .env files to load (later files override earlier)
+	// Supports: ".env", ".env.local", ".env.{env}", etc.
+	Files []string `yaml:"files,omitempty"`
 }
 
 // GetAddressForEnv returns the appropriate address for the given environment.

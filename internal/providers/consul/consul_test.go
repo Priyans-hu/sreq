@@ -1,7 +1,11 @@
 package consul
 
 import (
+	"context"
+	"os"
 	"testing"
+
+	"github.com/hashicorp/consul/api"
 )
 
 func TestResolvePath(t *testing.T) {
@@ -248,5 +252,168 @@ func TestResolvePathSimple(t *testing.T) {
 				t.Errorf("got %q, want %q", result, tt.expected)
 			}
 		})
+	}
+}
+
+func TestNew(t *testing.T) {
+	tests := []struct {
+		name      string
+		cfg       Config
+		expectErr bool
+	}{
+		{
+			name: "valid config with address",
+			cfg: Config{
+				Address: "localhost:8500",
+			},
+			expectErr: false,
+		},
+		{
+			name: "valid config with env addresses only",
+			cfg: Config{
+				EnvAddresses: map[string]string{
+					"prod": "consul-prod:8500",
+				},
+			},
+			expectErr: false,
+		},
+		{
+			name: "valid config with both",
+			cfg: Config{
+				Address: "consul-default:8500",
+				EnvAddresses: map[string]string{
+					"prod": "consul-prod:8500",
+				},
+				Token:      "test-token",
+				Datacenter: "dc1",
+			},
+			expectErr: false,
+		},
+		{
+			name:      "empty config - no addresses",
+			cfg:       Config{},
+			expectErr: true,
+		},
+		{
+			name: "config with empty strings",
+			cfg: Config{
+				Address:      "",
+				EnvAddresses: map[string]string{},
+			},
+			expectErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p, err := New(tt.cfg)
+			if tt.expectErr {
+				if err == nil {
+					t.Error("expected error, got nil")
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+				return
+			}
+			if p == nil {
+				t.Error("expected provider, got nil")
+			}
+		})
+	}
+}
+
+func TestNew_TokenFromEnv(t *testing.T) {
+	// Set up test environment variable
+	testToken := "test-env-token"
+	_ = os.Setenv("TEST_CONSUL_TOKEN", testToken)
+	defer func() { _ = os.Unsetenv("TEST_CONSUL_TOKEN") }()
+
+	cfg := Config{
+		Address: "localhost:8500",
+		Token:   "${TEST_CONSUL_TOKEN}",
+	}
+
+	p, err := New(cfg)
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+
+	if p.token != testToken {
+		t.Errorf("token = %q, want %q", p.token, testToken)
+	}
+}
+
+func TestNew_TokenFromEnv_NotSet(t *testing.T) {
+	// Ensure env var is not set
+	_ = os.Unsetenv("NONEXISTENT_TOKEN")
+
+	cfg := Config{
+		Address: "localhost:8500",
+		Token:   "${NONEXISTENT_TOKEN}",
+	}
+
+	p, err := New(cfg)
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+
+	// Token should be empty when env var is not set
+	if p.token != "" {
+		t.Errorf("token = %q, want empty string", p.token)
+	}
+}
+
+func TestProvider_Name(t *testing.T) {
+	p := &Provider{}
+	if p.Name() != "consul" {
+		t.Errorf("Name() = %q, want %q", p.Name(), "consul")
+	}
+}
+
+func TestProvider_queryOptions(t *testing.T) {
+	tests := []struct {
+		name       string
+		datacenter string
+	}{
+		{
+			name:       "with datacenter",
+			datacenter: "dc1",
+		},
+		{
+			name:       "without datacenter",
+			datacenter: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := &Provider{datacenter: tt.datacenter}
+			ctx := context.Background()
+			opts := p.queryOptions(ctx)
+
+			if opts == nil {
+				t.Error("queryOptions() returned nil")
+				return
+			}
+
+			if tt.datacenter != "" && opts.Datacenter != tt.datacenter {
+				t.Errorf("Datacenter = %q, want %q", opts.Datacenter, tt.datacenter)
+			}
+		})
+	}
+}
+
+func TestProvider_getClientForEnv_NoAddress(t *testing.T) {
+	p := &Provider{
+		defaultAddress: "",
+		envAddresses:   nil,
+		clients:        make(map[string]*api.Client),
+	}
+
+	_, err := p.getClientForEnv("prod")
+	if err == nil {
+		t.Error("expected error for missing address, got nil")
 	}
 }

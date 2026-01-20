@@ -19,6 +19,8 @@
   - [Overview](/providers/)
   - [Consul](/providers/consul)
   - [AWS Secrets Manager](/providers/aws)
+  - [Environment Variables](/providers/env)
+  - [dotenv](/providers/dotenv)
 
 - **Links**
   - [GitHub](https://github.com/Priyans-hu/sreq)
