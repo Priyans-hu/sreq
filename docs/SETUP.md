@@ -20,7 +20,14 @@ This guide helps you set up sreq (service-aware API client CLI) on your machine.
 
 ## Installation
 
-### Option 1: Download Binary (Recommended)
+### Option 1: Homebrew (macOS/Linux)
+
+```bash
+brew tap Priyans-hu/tap
+brew install sreq
+```
+
+### Option 2: Download Binary
 
 Download pre-built binaries from the [Releases page](https://github.com/Priyans-hu/sreq/releases).
 
@@ -51,13 +58,13 @@ Expand-Archive sreq.zip -DestinationPath .
 Move-Item sreq.exe C:\Windows\System32\
 ```
 
-### Option 2: Go Install
+### Option 3: Go Install
 
 ```bash
 go install github.com/Priyans-hu/sreq/cmd/sreq@latest
 ```
 
-### Option 3: Build from Source
+### Option 4: Build from Source
 
 ```bash
 # Clone the repository
