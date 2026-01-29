@@ -40,3 +40,17 @@ changelog:
       - '^docs:'
       - '^test:'
       - '^chore:'
+
+brews:
+  - repository:
+      owner: Priyans-hu
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    homepage: "https://github.com/Priyans-hu/sreq"
+    description: "Service-aware API client CLI with automatic credential fetching"
+    license: "MIT"
+    install: |
+      bin.install "sreq"
+    test: |
+      system "#{bin}/sreq", "--version"
