@@ -237,3 +237,57 @@ export function getFlatDocList(): SidebarLink[] {
   const sections = parseSidebar();
   return sections.flatMap((s) => s.links);
 }
+
+// ---------- search index ----------
+
+export interface SearchEntry {
+  title: string;
+  href: string;
+  section: string;
+  content: string; // plain text snippet for searching
+}
+
+export function buildSearchIndex(): SearchEntry[] {
+  const sections = parseSidebar();
+  const entries: SearchEntry[] = [];
+
+  for (const section of sections) {
+    for (const link of section.links) {
+      // Derive slug from href: "/docs/commands/run" → ["commands", "run"]
+      const slug = link.href
+        .replace(/^\/docs\/?/, "")
+        .split("/")
+        .filter(Boolean);
+
+      const filePath = resolveDocPath(slug);
+      if (!filePath) continue;
+
+      const raw = fs.readFileSync(filePath, "utf-8");
+      const { content } = matter(raw);
+
+      // Strip markdown syntax for plain text search
+      const plainText = content
+        .replace(/```[\s\S]*?```/g, "") // code blocks
+        .replace(/`[^`]+`/g, "") // inline code
+        .replace(/#{1,6}\s+/g, "") // headings
+        .replace(/\[([^\]]+)]\([^)]+\)/g, "$1") // links
+        .replace(/[*_~]+/g, "") // bold/italic/strikethrough
+        .replace(/\|[^\n]+/g, "") // table rows
+        .replace(/-{3,}/g, "") // horizontal rules
+        .replace(/>\s+/g, "") // blockquotes
+        .replace(/\n{2,}/g, " ")
+        .replace(/\n/g, " ")
+        .trim()
+        .slice(0, 500); // limit content size
+
+      entries.push({
+        title: link.label,
+        href: link.href,
+        section: section.heading || "Getting Started",
+        content: plainText,
+      });
+    }
+  }
+
+  return entries;
+}

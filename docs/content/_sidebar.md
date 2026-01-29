@@ -23,6 +23,9 @@
   - [AWS Secrets Manager](/providers/aws)
   - [Environment Variables](/providers/env)
   - [dotenv](/providers/dotenv)
+  - [HashiCorp Vault](/providers/vault)
+  - [GCP Secret Manager](/providers/gcp)
+  - [Azure Key Vault](/providers/azure)
 
 - **Links**
   - [GitHub](https://github.com/Priyans-hu/sreq)
