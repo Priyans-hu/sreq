@@ -9,6 +9,8 @@
 
 sreq eliminates the overhead of manually fetching credentials from multiple sources when testing APIs. Just specify the service name and environment — sreq handles the rest.
 
+> If you find this useful, consider giving it a [⭐ star on GitHub](https://github.com/Priyans-hu/sreq) — it helps others discover the project!
+
 ## The Problem
 
 ```
@@ -43,10 +45,16 @@ sreq POST /api/v1/users -s auth-service -e dev -d '{"name":"test"}'
 
 ## Installation
 
-### Homebrew (coming soon)
+### Quick Install (curl)
 
 ```bash
-brew install sreq
+curl -fsSL https://raw.githubusercontent.com/Priyans-hu/sreq/main/install.sh | bash
+```
+
+### Homebrew
+
+```bash
+brew install Priyans-hu/tap/sreq
 ```
 
 ### Go
