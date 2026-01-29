@@ -88,9 +88,9 @@ sreq cache clear           # Clear all cache
 
 | Provider | Status | Notes |
 |----------|--------|-------|
-| Environment Variables | Planned | Essential for local dev/CI |
+| Environment Variables | ✅ Available | Essential for local dev/CI |
+| dotenv files | ✅ Available | Parse local `.env` files |
 | HashiCorp Vault | Planned | Enterprise demand, KV v2 API |
-| dotenv files | Planned | Parse local `.env` files |
 | GCP Secret Manager | Planned | Complete cloud trifecta |
 | Azure Key Vault | Planned | Complete cloud trifecta |
 
@@ -131,8 +131,8 @@ providers:
 
 | Format | Status | Notes |
 |--------|--------|-------|
-| curl | Planned | `sreq history 5 --curl` |
-| HTTPie | Planned | `sreq history 5 --httpie` |
+| curl | ✅ Available | `sreq history 5 --curl` |
+| HTTPie | ✅ Available | `sreq history 5 --httpie` |
 | Bruno | Planned | `sreq export bruno ./collection` |
 | Postman | Future | Collection v2.1 format |
 
@@ -149,7 +149,8 @@ providers:
 |--------|--------|---------|
 | Binary download | ✅ Available | [Releases page](https://github.com/Priyans-hu/sreq/releases) |
 | Go install | ✅ Available | `go install github.com/Priyans-hu/sreq/cmd/sreq@latest` |
-| Homebrew | 🔜 Coming | `brew tap Priyans-hu/tap && brew install sreq` |
+| Homebrew | ✅ Available | `brew install Priyans-hu/tap/sreq` |
+| Quick Install | ✅ Available | `curl -fsSL .../install.sh \| bash` |
 | Scoop | Planned | `scoop install sreq` |
 
 ### Phase 6: Advanced Features

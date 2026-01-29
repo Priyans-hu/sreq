@@ -19,6 +19,7 @@ sreq config <command>
 | Command | Description |
 |---------|-------------|
 | `sreq config show` | Display current configuration |
+| `sreq config path` | Show config file path |
 | `sreq config test` | Test provider connections |
 
 ## sreq config show
@@ -54,6 +55,20 @@ services:
   auth-service:
     consul_key: auth
     aws_prefix: auth-svc
+```
+
+## sreq config path
+
+Show the config file path:
+
+```bash
+sreq config path
+```
+
+Output:
+
+```
+/Users/you/.sreq/config.yaml
 ```
 
 ## sreq config test

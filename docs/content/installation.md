@@ -8,11 +8,18 @@ order: 2
 
 sreq is available for macOS, Linux, and Windows on both AMD64 and ARM64 architectures.
 
+## Quick Install (curl)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Priyans-hu/sreq/main/install.sh | bash
+```
+
+Detects your OS and architecture, downloads the correct binary, and installs to `/usr/local/bin`.
+
 ## Homebrew (macOS/Linux)
 
 ```bash
-brew tap Priyans-hu/tap
-brew install sreq
+brew install Priyans-hu/tap/sreq
 ```
 
 ## Go Install
@@ -118,8 +125,10 @@ sreq requires credentials for the providers you want to use:
 
 | Provider | Requirement |
 |----------|-------------|
-| Consul | `CONSUL_TOKEN` or token in config |
+| Consul | `CONSUL_HTTP_TOKEN` or token in config |
 | AWS Secrets Manager | AWS credentials (profile, env vars, or IAM role) |
+| Environment Variables | Variables set in shell |
+| Dotenv | `.env` file in project directory |
 
 See [Configuration](/sreq/configuration) for detailed setup instructions.
 

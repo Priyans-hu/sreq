@@ -56,6 +56,8 @@ Pull credentials from multiple sources in a single request:
 
 - **Consul KV** — Base URLs, usernames, configuration
 - **AWS Secrets Manager** — Passwords, API keys, sensitive data
+- **Environment Variables** — Direct env var resolution for CI/CD and containers
+- **Dotenv Files** — Read from `.env` files for local development
 - **HashiCorp Vault** — Coming soon
 
 ### Environment Switching
@@ -130,5 +132,6 @@ A CLI tool that makes service-aware HTTP requests with automatic credential reso
 ## Next Steps
 
 - [Installation](/sreq/installation) — Get sreq installed
-- [Getting Started](/sreq/getting-started) — Your first request in 5 minutes
+- [Getting Started](/sreq/getting-started) — Your first request in minutes
 - [Configuration](/sreq/configuration) — Deep dive into config options
+- [Providers](/sreq/providers/) — Provider-specific setup guides

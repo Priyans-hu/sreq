@@ -20,14 +20,21 @@ This guide helps you set up sreq (service-aware API client CLI) on your machine.
 
 ## Installation
 
-### Option 1: Homebrew (macOS/Linux)
+### Option 1: Quick Install (curl)
 
 ```bash
-brew tap Priyans-hu/tap
-brew install sreq
+curl -fsSL https://raw.githubusercontent.com/Priyans-hu/sreq/main/install.sh | bash
 ```
 
-### Option 2: Download Binary
+Detects your OS and architecture, downloads the correct binary from GitHub Releases, and installs to `/usr/local/bin`.
+
+### Option 2: Homebrew (macOS/Linux)
+
+```bash
+brew install Priyans-hu/tap/sreq
+```
+
+### Option 3: Download Binary
 
 Download pre-built binaries from the [Releases page](https://github.com/Priyans-hu/sreq/releases).
 
@@ -58,13 +65,13 @@ Expand-Archive sreq.zip -DestinationPath .
 Move-Item sreq.exe C:\Windows\System32\
 ```
 
-### Option 3: Go Install
+### Option 4: Go Install
 
 ```bash
 go install github.com/Priyans-hu/sreq/cmd/sreq@latest
 ```
 
-### Option 4: Build from Source
+### Option 5: Build from Source
 
 ```bash
 # Clone the repository
@@ -160,16 +167,52 @@ export AWS_PROFILE="myprofile"
 # Automatically uses instance metadata
 ```
 
+#### Environment Variables Provider
+
+No extra setup needed — just set environment variables:
+
+```bash
+export AUTH_SERVICE_BASE_URL="https://auth.example.com"
+export AUTH_SERVICE_API_KEY="your-key"
+```
+
+And configure in `config.yaml`:
+
+```yaml
+providers:
+  env:
+    paths:
+      base_url: "{SERVICE}_BASE_URL"
+      api_key: "{SERVICE}_API_KEY"
+```
+
+#### Dotenv Provider
+
+Create a `.env` file in your project:
+
+```bash
+AUTH_API_KEY=dev-key-123
+AUTH_DEV_URL=http://localhost:8080
+```
+
+And configure in `config.yaml`:
+
+```yaml
+providers:
+  dotenv:
+    file: ".env"
+    paths:
+      api_key: "{SERVICE}_API_KEY"
+      base_url: "{SERVICE}_{ENV}_URL"
+```
+
 ## Verify Setup
 
 ### Test Provider Connection
 
 ```bash
-# Test Consul connection
-sreq auth test consul
-
-# Test AWS connection
-sreq auth test aws
+# Test all provider connections
+sreq config test
 ```
 
 ### Test a Service Request
@@ -268,6 +311,7 @@ After setup, your sreq directory looks like:
 |----------|---------|---------|
 | `SREQ_CONFIG` | Custom config path | `~/.sreq/config.yaml` |
 | `SREQ_NO_CACHE` | Disable caching (`1` to disable) | - |
+| `SREQ_NO_HISTORY` | Disable history (`1` to disable) | - |
 | `CI` | Auto-disable cache in CI (`true` or `1`) | - |
 
 ## Troubleshooting

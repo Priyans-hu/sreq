@@ -43,6 +43,17 @@ providers:
       password: "{service}/{env}/credentials#password"
       api_key: "{service}/{env}/credentials#api_key"
 
+  env:
+    paths:
+      base_url: "{SERVICE}_BASE_URL"
+      api_key: "{SERVICE}_API_KEY"
+
+  dotenv:
+    file: ".env"
+    paths:
+      base_url: "{SERVICE}_{ENV}_URL"
+      password: "{SERVICE}_PASSWORD"
+
 # Available environments
 environments:
   - dev
@@ -178,7 +189,7 @@ sreq run GET /api -s auth -c production -e staging
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `SREQ_CONFIG` | Config file path | `~/.sreq/config.yaml` |
-| `CONSUL_TOKEN` | Consul ACL token | — |
+| `CONSUL_HTTP_TOKEN` | Consul ACL token | — |
 | `CONSUL_HTTP_ADDR` | Consul address | — |
 | `AWS_PROFILE` | AWS profile | `default` |
 | `AWS_REGION` | AWS region | — |

@@ -79,7 +79,7 @@ The wizard prompts for:
 | Field | Description | Environment Variable |
 |-------|-------------|---------------------|
 | Address | Consul server address | `CONSUL_HTTP_ADDR` |
-| Token | ACL token for authentication | `CONSUL_TOKEN` |
+| Token | ACL token for authentication | `CONSUL_HTTP_TOKEN` |
 | Datacenter | Optional datacenter | — |
 
 ### AWS

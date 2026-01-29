@@ -20,6 +20,7 @@ sreq env <command>
 |---------|-------------|
 | `sreq env list` | List available environments |
 | `sreq env switch <env>` | Switch default environment |
+| `sreq env current` | Show current default environment |
 
 ## sreq env list
 
@@ -72,6 +73,20 @@ environments:
   - qa        # Add custom environments
 
 default_env: dev
+```
+
+## sreq env current
+
+Show the current default environment:
+
+```bash
+sreq env current
+```
+
+Output:
+
+```
+Current default environment: dev
 ```
 
 ## Per-Request Override
