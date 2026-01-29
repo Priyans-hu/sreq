@@ -283,5 +283,5 @@ Error: key "password" not found in secret JSON
 
 ## See Also
 
-- [Consul Provider](/sreq/providers/consul) — Consul KV setup
-- [Configuration](/sreq/configuration) — Full configuration reference
+- [Consul Provider](/providers/consul) — Consul KV setup
+- [Configuration](/configuration) — Full configuration reference

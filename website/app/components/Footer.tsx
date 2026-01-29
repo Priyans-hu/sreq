@@ -6,7 +6,7 @@ const links = [
   { label: "Issues", href: "https://github.com/Priyans-hu/sreq/issues" },
   {
     label: "Documentation",
-    href: "https://github.com/Priyans-hu/sreq#usage",
+    href: "/sreq/docs/",
   },
 ];
 

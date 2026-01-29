@@ -10,8 +10,8 @@ This guide will have you making authenticated API requests in under 5 minutes.
 
 ## Prerequisites
 
-- sreq installed ([Installation](/sreq/installation))
-- Access to at least one provider (Consul or AWS)
+- sreq installed ([Installation](/installation))
+- Access to at least one provider (Consul, AWS, env vars, or a `.env` file)
 
 ## Step 1: Initialize Configuration
 
@@ -42,6 +42,8 @@ Alternatively, configure providers individually:
 sreq auth consul   # Just Consul
 sreq auth aws      # Just AWS
 ```
+
+> **Tip:** For quick local testing, you can skip `sreq auth` and use the `env` or `dotenv` provider instead — just set environment variables or create a `.env` file. See [Providers](/providers/) for details.
 
 ## Step 3: Add a Service
 
@@ -157,6 +159,6 @@ sreq run GET /api/v1/users -s auth-service -e dev --dry-run
 
 ## Next Steps
 
-- [Configuration](/sreq/configuration) — Deep dive into config options
-- [Commands](/sreq/commands) — Full command reference
-- [Providers](/sreq/providers) — Provider-specific configuration
+- [Configuration](/configuration) — Deep dive into config options
+- [Commands](/commands) — Full command reference
+- [Providers](/providers) — Provider-specific configuration

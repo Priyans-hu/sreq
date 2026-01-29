@@ -108,5 +108,5 @@ Browse request history:
 
 ## See Also
 
-- [run](/sreq/commands/run) — CLI request execution
-- [history](/sreq/commands/history) — CLI history management
+- [run](/commands/run) — CLI request execution
+- [history](/commands/history) — CLI history management

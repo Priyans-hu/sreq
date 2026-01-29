@@ -200,5 +200,5 @@ History is stored in `~/.sreq/history.json`.
 
 ## See Also
 
-- [run](/sreq/commands/run) — Make requests
-- [cache](/sreq/commands/cache) — Manage credential cache
+- [run](/commands/run) — Make requests
+- [cache](/commands/cache) — Manage credential cache

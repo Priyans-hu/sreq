@@ -95,5 +95,5 @@ services: {}
 
 ## See Also
 
-- [auth](/sreq/commands/auth) — Configure provider authentication
-- [Configuration](/sreq/configuration) — Full configuration reference
+- [auth](/commands/auth) — Configure provider authentication
+- [Configuration](/configuration) — Full configuration reference

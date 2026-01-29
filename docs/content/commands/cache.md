@@ -163,5 +163,5 @@ cache:
 
 ## See Also
 
-- [run](/sreq/commands/run) — Make requests with `--offline` flag
-- [Configuration](/sreq/configuration) — Cache configuration options
+- [run](/commands/run) — Make requests with `--offline` flag
+- [Configuration](/configuration) — Cache configuration options

@@ -155,5 +155,5 @@ Alternatively, services can be defined in a separate `~/.sreq/services.yaml` fil
 
 ## See Also
 
-- [run](/sreq/commands/run) — Make requests to services
-- [Configuration](/sreq/configuration) — Full configuration reference
+- [run](/commands/run) — Make requests to services
+- [Configuration](/configuration) — Full configuration reference

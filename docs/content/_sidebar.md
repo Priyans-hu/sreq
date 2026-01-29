@@ -14,6 +14,8 @@
   - [tui](/commands/tui)
   - [config](/commands/config)
   - [env](/commands/env)
+  - [upgrade](/commands/upgrade)
+  - [version](/commands/version)
 
 - **Providers**
   - [Overview](/providers/)

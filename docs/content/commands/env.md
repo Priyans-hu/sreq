@@ -20,6 +20,7 @@ sreq env <command>
 |---------|-------------|
 | `sreq env list` | List available environments |
 | `sreq env switch <env>` | Switch default environment |
+| `sreq env current` | Show current default environment |
 
 ## sreq env list
 
@@ -74,6 +75,20 @@ environments:
 default_env: dev
 ```
 
+## sreq env current
+
+Show the current default environment:
+
+```bash
+sreq env current
+```
+
+Output:
+
+```
+Current default environment: dev
+```
+
 ## Per-Request Override
 
 Always override with `-e` flag:
@@ -101,5 +116,5 @@ providers:
 
 ## See Also
 
-- [run](/sreq/commands/run) — Make requests with `-e` flag
-- [Configuration](/sreq/configuration) — Full configuration reference
+- [run](/commands/run) — Make requests with `-e` flag
+- [Configuration](/configuration) — Full configuration reference

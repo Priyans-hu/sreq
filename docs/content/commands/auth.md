@@ -79,7 +79,7 @@ The wizard prompts for:
 | Field | Description | Environment Variable |
 |-------|-------------|---------------------|
 | Address | Consul server address | `CONSUL_HTTP_ADDR` |
-| Token | ACL token for authentication | `CONSUL_TOKEN` |
+| Token | ACL token for authentication | `CONSUL_HTTP_TOKEN` |
 | Datacenter | Optional datacenter | — |
 
 ### AWS
@@ -115,6 +115,6 @@ providers:
 
 ## See Also
 
-- [Configuration](/sreq/configuration) — Full configuration reference
-- [Consul Provider](/sreq/providers/consul) — Consul setup details
-- [AWS Provider](/sreq/providers/aws) — AWS setup details
+- [Configuration](/configuration) — Full configuration reference
+- [Consul Provider](/providers/consul) — Consul setup details
+- [AWS Provider](/providers/aws) — AWS setup details

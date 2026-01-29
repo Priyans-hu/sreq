@@ -1,9 +1,9 @@
-name: Deploy Landing Page
+name: Deploy Site
 
 on:
   push:
     branches: [main]
-    paths: ['website/**']
+    paths: ['website/**', 'docs/**']
 
 permissions:
   contents: read
@@ -30,11 +30,14 @@ jobs:
         run: npm ci
         working-directory: website
 
-      - name: Build
+      - name: Build landing page
         run: npm run build
         working-directory: website
         env:
           NODE_ENV: production
+
+      - name: Copy docs into build output
+        run: cp -r docs website/out/docs
 
       - uses: actions/upload-pages-artifact@v3
         with:

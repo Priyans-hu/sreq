@@ -12,16 +12,16 @@ Complete reference for all sreq commands.
 
 | Command | Description |
 |---------|-------------|
-| [`sreq run`](/sreq/commands/run) | Make HTTP requests |
-| [`sreq init`](/sreq/commands/init) | Initialize configuration |
-| [`sreq auth`](/sreq/commands/auth) | Configure provider authentication |
-| [`sreq service`](/sreq/commands/service) | Manage service configurations |
-| [`sreq env`](/sreq/commands/env) | Manage environments |
-| [`sreq config`](/sreq/commands/config) | View and validate configuration |
-| [`sreq history`](/sreq/commands/history) | View and manage request history |
-| [`sreq cache`](/sreq/commands/cache) | Manage credential cache |
-| [`sreq sync`](/sreq/commands/cache#sync) | Sync credentials to cache |
-| [`sreq tui`](/sreq/commands/tui) | Interactive terminal UI |
+| [`sreq run`](/commands/run) | Make HTTP requests |
+| [`sreq init`](/commands/init) | Initialize configuration |
+| [`sreq auth`](/commands/auth) | Configure provider authentication |
+| [`sreq service`](/commands/service) | Manage service configurations |
+| [`sreq env`](/commands/env) | Manage environments |
+| [`sreq config`](/commands/config) | View and validate configuration |
+| [`sreq history`](/commands/history) | View and manage request history |
+| [`sreq cache`](/commands/cache) | Manage credential cache |
+| [`sreq sync`](/commands/cache#sync) | Sync credentials to cache |
+| [`sreq tui`](/commands/tui) | Interactive terminal UI |
 | `sreq version` | Show version |
 | `sreq upgrade` | Self-update to latest version |
 | `sreq completion` | Generate shell completions |

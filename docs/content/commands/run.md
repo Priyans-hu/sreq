@@ -150,6 +150,6 @@ sreq run GET /api -s auth -c production -e staging
 
 ## See Also
 
-- [history](/sreq/commands/history) — View and replay requests
-- [cache](/sreq/commands/cache) — Manage credential cache
-- [Configuration](/sreq/configuration) — Setup providers and services
+- [history](/commands/history) — View and replay requests
+- [cache](/commands/cache) — Manage credential cache
+- [Configuration](/configuration) — Setup providers and services

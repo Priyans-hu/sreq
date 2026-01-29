@@ -1,20 +1,20 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Shield, Globe, Layers, Terminal, Zap, Lock } from "lucide-react";
+import { Shield, Globe, Layers, Terminal, History, Lock } from "lucide-react";
 
 const features = [
   {
     icon: Shield,
     title: "Auto Credentials",
     description:
-      "Fetches secrets from AWS Secrets Manager, Consul, or HashiCorp Vault. No more manual token juggling.",
+      "Fetches secrets from Consul, AWS Secrets Manager, env vars, and dotenv files. No more manual token juggling.",
   },
   {
     icon: Globe,
     title: "Service Discovery",
     description:
-      "Resolves service URLs from Consul automatically. Just specify the service name and environment.",
+      "Resolves service URLs from providers automatically. Just specify the service name and environment.",
   },
   {
     icon: Layers,
@@ -24,21 +24,21 @@ const features = [
   },
   {
     icon: Terminal,
-    title: "CLI Native",
+    title: "Interactive TUI",
     description:
-      "Familiar curl-like syntax. Drop-in replacement for your API testing workflow.",
+      "Browse services, build requests, and view history in a terminal UI. Or use the familiar CLI syntax.",
   },
   {
-    icon: Zap,
-    title: "Zero Config",
+    icon: History,
+    title: "Request History",
     description:
-      "Works out of the box with sensible defaults. Optional .sreq.yaml for advanced setups.",
+      "Track, replay, and export previous requests as curl or HTTPie commands. Never lose a request again.",
   },
   {
     icon: Lock,
-    title: "Secure by Default",
+    title: "Secure Caching",
     description:
-      "Credentials are fetched at request time, never stored locally. Supports mTLS and token rotation.",
+      "AES-256 encrypted local credential cache with TTL. Supports offline mode for working without network access.",
   },
 ];
 

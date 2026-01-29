@@ -238,5 +238,5 @@ Error: key not found: services/auth/dev/base_url
 
 ## See Also
 
-- [AWS Provider](/sreq/providers/aws) — AWS Secrets Manager setup
-- [Configuration](/sreq/configuration) — Full configuration reference
+- [AWS Provider](/providers/aws) — AWS Secrets Manager setup
+- [Configuration](/configuration) — Full configuration reference

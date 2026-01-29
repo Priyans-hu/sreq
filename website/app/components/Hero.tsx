@@ -86,9 +86,7 @@ export default function Hero() {
             View on GitHub
           </a>
           <a
-            href="https://github.com/Priyans-hu/sreq#usage"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/sreq/docs/"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-neutral-700 hover:border-neutral-500 text-neutral-300 hover:text-white font-semibold transition-colors"
           >
             <BookOpen className="w-4 h-4" />
