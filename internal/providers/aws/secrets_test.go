@@ -148,6 +148,44 @@ func TestResolvePath(t *testing.T) {
 			vars:     map[string]string{"service": "test"},
 			expected: "static/secret/path",
 		},
+		{
+			name:     "repeated placeholder",
+			template: "{env}/{service}/{env}",
+			vars: map[string]string{
+				"env":     "prod",
+				"service": "api",
+			},
+			expected: "prod/api/prod",
+		},
+		{
+			name:     "missing var",
+			template: "{service}/{env}/secret",
+			vars: map[string]string{
+				"service": "api",
+			},
+			expected: "api/{env}/secret",
+		},
+		{
+			name:     "empty vars",
+			template: "{service}/config",
+			vars:     map[string]string{},
+			expected: "{service}/config",
+		},
+		{
+			name:     "nil vars",
+			template: "static/path",
+			vars:     nil,
+			expected: "static/path",
+		},
+		{
+			name:     "region placeholder",
+			template: "{region}/{service}/credentials",
+			vars: map[string]string{
+				"region":  "us-east-1",
+				"service": "api",
+			},
+			expected: "us-east-1/api/credentials",
+		},
 	}
 
 	for _, tt := range tests {
@@ -157,5 +195,99 @@ func TestResolvePath(t *testing.T) {
 				t.Errorf("got %q, want %q", result, tt.expected)
 			}
 		})
+	}
+}
+
+func TestExtractJSONKey_EdgeCases(t *testing.T) {
+	tests := []struct {
+		name      string
+		json      string
+		key       string
+		expected  string
+		expectErr bool
+	}{
+		{
+			name:      "unterminated string",
+			json:      `{"key": "value`,
+			key:       "key",
+			expectErr: true,
+		},
+		{
+			name:      "no colon after key",
+			json:      `{"key" "value"}`,
+			key:       "key",
+			expectErr: true,
+		},
+		{
+			name:     "null value",
+			json:     `{"value": null}`,
+			key:      "value",
+			expected: "null",
+		},
+		{
+			name:     "negative number",
+			json:     `{"offset": -10}`,
+			key:      "offset",
+			expected: "-10",
+		},
+		{
+			name:     "float number",
+			json:     `{"rate": 0.5}`,
+			key:      "rate",
+			expected: "0.5",
+		},
+		{
+			name:     "value at end without comma",
+			json:     `{"last": "item"}`,
+			key:      "last",
+			expected: "item",
+		},
+		{
+			name:     "value in middle with comma",
+			json:     `{"first": "one", "second": "two"}`,
+			key:      "first",
+			expected: "one",
+		},
+		{
+			name:     "string with escaped quotes",
+			json:     `{"msg": "say \"hello\""}`,
+			key:      "msg",
+			expected: "say \\",
+		},
+		{
+			name:     "empty string value",
+			json:     `{"empty": ""}`,
+			key:      "empty",
+			expected: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := extractJSONKey(tt.json, tt.key)
+
+			if tt.expectErr {
+				if err == nil {
+					t.Error("expected error, got nil")
+				}
+				return
+			}
+
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+				return
+			}
+
+			if result != tt.expected {
+				t.Errorf("got %q, want %q", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestProvider_Name(t *testing.T) {
+	p := &Provider{}
+	if p.Name() != "aws_secrets" {
+		t.Errorf("Name() = %q, want %q", p.Name(), "aws_secrets")
 	}
 }

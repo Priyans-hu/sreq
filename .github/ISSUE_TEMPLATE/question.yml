@@ -1,0 +1,46 @@
+name: Question
+description: Ask a question about usage or configuration
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're happy to help! Please check the [docs](https://github.com/Priyans-hu/sreq/blob/main/docs/SETUP.md) first.
+
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Question topic
+      options:
+        - Installation / Setup
+        - Configuration
+        - Provider (Consul, AWS)
+        - Commands / Usage
+        - Integration with other tools
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: What would you like to know?
+      placeholder: |
+        How do I configure sreq to use different Consul servers for different environments?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Any relevant context about your setup or what you're trying to achieve
+      placeholder: |
+        I have separate Consul clusters for prod and non-prod environments...
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried?
+      description: Any approaches you've already attempted?
