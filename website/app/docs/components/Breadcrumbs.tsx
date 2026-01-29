@@ -3,22 +3,21 @@ import { ChevronRight } from "lucide-react";
 
 interface BreadcrumbsProps {
   slug: string[];
-  basePath: string;
 }
 
-export default function Breadcrumbs({ slug, basePath }: BreadcrumbsProps) {
+export default function Breadcrumbs({ slug }: BreadcrumbsProps) {
   if (slug.length === 0) return null;
 
   const crumbs = slug.map((segment, i) => ({
-    label: segment.charAt(0).toUpperCase() + segment.slice(1),
-    href: `${basePath}/docs/${slug.slice(0, i + 1).join("/")}`,
+    label: segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " "),
+    href: `/docs/${slug.slice(0, i + 1).join("/")}`,
     isLast: i === slug.length - 1,
   }));
 
   return (
     <nav className="flex items-center gap-1.5 text-sm text-neutral-500 mb-6">
       <Link
-        href={`${basePath}/docs`}
+        href="/docs"
         className="hover:text-neutral-300 transition-colors"
       >
         Docs

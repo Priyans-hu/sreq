@@ -5,8 +5,6 @@ import TableOfContents from "../components/TableOfContents";
 import Breadcrumbs from "../components/Breadcrumbs";
 import PrevNextLinks from "../components/PrevNextLinks";
 
-const basePath = process.env.NODE_ENV === "production" ? "/sreq" : "";
-
 interface PageProps {
   params: Promise<{ slug?: string[] }>;
 }
@@ -33,7 +31,10 @@ export default async function DocPage({ params }: PageProps) {
   if (!doc) notFound();
 
   const flatList = getFlatDocList();
-  const currentPath = resolvedSlug.length > 0 ? `/docs/${resolvedSlug.join("/")}` : "/docs";
+  const currentPath =
+    resolvedSlug.length > 0
+      ? `/docs/${resolvedSlug.join("/")}`
+      : "/docs";
   const currentIndex = flatList.findIndex((l) => l.href === currentPath);
   const prev = currentIndex > 0 ? flatList[currentIndex - 1] : null;
   const next =
@@ -43,10 +44,10 @@ export default async function DocPage({ params }: PageProps) {
 
   return (
     <>
-      <Breadcrumbs slug={resolvedSlug} basePath={basePath} />
+      <Breadcrumbs slug={resolvedSlug} />
       <DocContent html={doc.html} />
       <TableOfContents items={doc.toc} />
-      <PrevNextLinks prev={prev} next={next} basePath={basePath} />
+      <PrevNextLinks prev={prev} next={next} />
     </>
   );
 }
