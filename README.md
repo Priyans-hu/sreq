@@ -31,17 +31,23 @@ sreq POST /api/v1/users -s auth-service -e dev -d '{"name":"test"}'
 # sreq automatically:
 # ✓ Fetches base URL from Consul
 # ✓ Fetches credentials from AWS Secrets Manager
-# ✓ Makes the request
+# ✓ Caches credentials locally (AES-256 encrypted)
+# ✓ Makes the request and saves it to history
 ```
 
 ## Features
 
 - **Service-aware** — Pass service name, sreq resolves everything
-- **Multi-provider** — Consul, AWS Secrets Manager, HashiCorp Vault (planned)
+- **Multi-provider** — Consul, AWS Secrets Manager, Environment Variables, Dotenv files
 - **Environment switching** — Seamlessly switch between dev, staging, prod
+- **Credential caching** — AES-256 encrypted local cache with TTL, offline mode support
+- **Request history** — Track, replay, and export requests as curl/HTTPie
+- **Interactive TUI** — Terminal UI for browsing services and history
+- **Self-update** — `sreq upgrade` fetches the latest version from GitHub
+- **Context system** — Save presets for env/region/project/app combinations
+- **Health checks** — Test provider connectivity before making requests
 - **Zero copy-paste** — No more manual credential hunting
 - **Git-friendly config** — Share service configs with your team
-- **AI/LLM friendly** — Designed for integration with AI assistants
 
 ## Installation
 
@@ -81,7 +87,7 @@ This creates `~/.sreq/config.yaml`:
 providers:
   consul:
     address: consul.example.com:8500
-    token: ${CONSUL_TOKEN}
+    token: ${CONSUL_HTTP_TOKEN}
     paths:
       base_url: "services/{service}/config/base_url"
       username: "services/{service}/config/username"
@@ -100,12 +106,21 @@ environments:
 default_env: dev
 ```
 
-### 2. Add a service
+### 2. Set up authentication
 
 ```bash
-sreq service add auth-service \
-  --consul-key auth \
-  --aws-prefix auth-service
+# Interactive setup for all providers
+sreq auth
+
+# Or configure a specific provider
+sreq auth consul
+sreq auth aws
+```
+
+### 3. Add a service
+
+```bash
+sreq service add auth-service
 ```
 
 Or edit `~/.sreq/services.yaml`:
@@ -121,7 +136,7 @@ services:
     aws_prefix: billing-svc
 ```
 
-### 3. Make requests
+### 4. Make requests
 
 ```bash
 # GET request
@@ -138,6 +153,12 @@ sreq GET /api/v1/users -s auth-service -H "X-Custom: value"
 
 # Verbose output (shows resolved URLs/creds)
 sreq GET /api/v1/users -s auth-service -v
+
+# Dry run (show what would be sent without executing)
+sreq GET /api/v1/users -s auth-service --dry-run
+
+# Use cached credentials only (no provider calls)
+sreq GET /api/v1/users -s auth-service --offline
 ```
 
 ## Commands
@@ -148,22 +169,68 @@ sreq GET /api/v1/users -s auth-service -v
 | `sreq <METHOD> <path>` | Make HTTP request |
 | `sreq service list` | List configured services |
 | `sreq service add <name>` | Add a new service |
+| `sreq service remove <name>` | Remove a service |
 | `sreq env list` | List environments |
 | `sreq env switch <env>` | Switch default environment |
+| `sreq env current` | Show current default environment |
+| `sreq auth` | Interactive authentication setup |
+| `sreq auth consul` | Configure Consul authentication |
+| `sreq auth aws` | Configure AWS authentication |
 | `sreq config show` | Show current configuration |
+| `sreq config path` | Show config file path |
+| `sreq config test` | Test provider connectivity |
+| `sreq cache status` | Show cache status and entries |
+| `sreq cache clear [env]` | Clear cached credentials |
+| `sreq sync [env]` | Sync credentials to local cache |
+| `sreq history` | List request history |
+| `sreq history <id>` | View a specific request |
+| `sreq history <id> --replay` | Replay a previous request |
+| `sreq history <id> --curl` | Export as curl command |
+| `sreq history <id> --httpie` | Export as HTTPie command |
+| `sreq history --clear` | Clear request history |
+| `sreq tui` | Open interactive terminal UI |
+| `sreq upgrade` | Update to latest version |
 | `sreq version` | Show version |
 
 ## Flags
+
+### Global
 
 | Flag | Short | Description |
 |------|-------|-------------|
 | `--service` | `-s` | Service name |
 | `--env` | `-e` | Environment (dev/staging/prod) |
-| `--data` | `-d` | Request body (or @filename) |
-| `--header` | `-H` | Add header (repeatable) |
+| `--context` | `-c` | Context preset (overrides env/region/project/app) |
+| `--region` | `-r` | Region |
+| `--project` | `-p` | Project name |
+| `--app` | `-a` | App name |
 | `--verbose` | `-v` | Show detailed output |
+
+### Request
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--data` | `-d` | Request body (or @filename for file) |
+| `--header` | `-H` | Add header (repeatable) |
+| `--output` | `-o` | Output format (json/raw/headers) |
+| `--timeout` | | Request timeout (default: 30s) |
 | `--dry-run` | | Show what would be sent without executing |
-| `--output` | `-o` | Output format (json/table/raw) |
+| `--offline` | | Use cached credentials only |
+| `--no-cache` | | Skip cache, fetch fresh credentials |
+
+### History
+
+| Flag | Description |
+|------|-------------|
+| `--service` | Filter by service name |
+| `--env` | Filter by environment |
+| `--method` | Filter by HTTP method |
+| `--all` | Show all history entries |
+| `--clear` | Clear history |
+| `--before` | Clear entries older than duration (7d, 24h) |
+| `--curl` | Export as curl command |
+| `--httpie` | Export as HTTPie command |
+| `--replay` | Replay the request |
 
 ## Configuration
 
@@ -172,7 +239,9 @@ sreq GET /api/v1/users -s auth-service -v
 | Variable | Description |
 |----------|-------------|
 | `SREQ_CONFIG` | Config file path (default: `~/.sreq/config.yaml`) |
-| `CONSUL_TOKEN` | Consul ACL token |
+| `SREQ_NO_CACHE` | Disable credential caching |
+| `SREQ_NO_HISTORY` | Disable request history |
+| `CONSUL_HTTP_TOKEN` | Consul ACL token |
 | `AWS_PROFILE` | AWS profile for Secrets Manager |
 | `AWS_REGION` | AWS region override |
 
@@ -185,12 +254,16 @@ sreq GET /api/v1/users -s auth-service -v
 providers:
   consul:
     address: consul.example.com:8500
-    token: ${CONSUL_TOKEN}
+    token: ${CONSUL_HTTP_TOKEN}
     datacenter: dc1  # optional
+    env_addresses:   # optional, per-environment addresses
+      prod: consul-prod.internal:8500
     paths:
       base_url: "services/{service}/base_url"
       username: "services/{service}/username"
 ```
+
+Path placeholders: `{service}`, `{env}`, `{region}`, `{project}`, `{app}`
 
 </details>
 
@@ -207,7 +280,41 @@ providers:
       api_key: "{service}/{env}/credentials#api_key"
 ```
 
-Note: Use `#` to access JSON keys within a secret.
+Use `#` to extract a JSON key from within a secret value.
+
+</details>
+
+<details>
+<summary><b>Environment Variables</b></summary>
+
+```yaml
+providers:
+  env:
+    paths:
+      base_url: "{SERVICE}_BASE_URL"
+      username: "{SERVICE}_USERNAME"
+      password: "{SERVICE}_PASSWORD"
+      api_key: "{SERVICE}_API_KEY"
+```
+
+Reads credentials directly from environment variables.
+
+</details>
+
+<details>
+<summary><b>Dotenv Files</b></summary>
+
+```yaml
+providers:
+  dotenv:
+    path: ".env.{env}"  # resolves to .env.dev, .env.prod, etc.
+    paths:
+      base_url: "BASE_URL"
+      username: "USERNAME"
+      password: "PASSWORD"
+```
+
+Reads credentials from `.env` files with environment-based path resolution.
 
 </details>
 
@@ -225,37 +332,80 @@ providers:
 
 </details>
 
+### Contexts
+
+Contexts are presets that bundle env, region, project, and app into a single name:
+
+```yaml
+contexts:
+  dev-us:
+    env: dev
+    region: us-east-1
+    project: myproject
+    app: myapp
+  prod-eu:
+    env: prod
+    region: eu-west-1
+    project: myproject
+    app: myapp
+
+default_context: dev-us
+```
+
+```bash
+# Use a context instead of individual flags
+sreq GET /api/v1/users -s auth-service -c prod-eu
+```
+
 ## Project Structure
 
 ```
 sreq/
-├── cmd/
-│   └── sreq/
-│       └── main.go          # CLI entrypoint
+├── cmd/sreq/             # CLI entrypoint and commands
 ├── internal/
-│   ├── config/              # Configuration loading
-│   ├── providers/           # Secret providers
-│   │   ├── consul/          # Consul KV provider
-│   │   └── aws/             # AWS Secrets Manager provider
-│   └── client/              # HTTP client
-├── pkg/
-│   └── types/               # Shared types
-├── go.mod
-├── go.sum
-├── README.md
-├── LICENSE
-└── llms.txt                 # AI/LLM context file
+│   ├── cache/            # AES-256 encrypted credential cache
+│   ├── client/           # HTTP client
+│   ├── config/           # Configuration loading
+│   ├── errors/           # Custom error types
+│   ├── history/          # Request history tracking
+│   ├── providers/        # Credential providers
+│   │   ├── consul/       # Consul KV provider
+│   │   ├── aws/          # AWS Secrets Manager provider
+│   │   ├── env/          # Environment variables provider
+│   │   └── dotenv/       # Dotenv file provider
+│   ├── resolver/         # Multi-provider resolution
+│   └── tui/              # Terminal UI (BubbleTea)
+├── pkg/types/            # Shared types
+├── docs/                 # Documentation site (Docsify)
+├── website/              # Landing page (Next.js)
+├── .goreleaser.yml       # Cross-platform release automation
+├── install.sh            # Quick install script
+└── codecov.yml           # Coverage config
 ```
+
+## Documentation
+
+Full documentation is available at the [docs site](https://priyans-hu.github.io/sreq/).
 
 ## Roadmap
 
-- [x] Project setup
-- [ ] Consul provider
-- [ ] AWS Secrets Manager provider
-- [ ] Credential caching (offline mode)
+- [x] Project setup & CI/CD
+- [x] Consul KV provider
+- [x] AWS Secrets Manager provider
+- [x] Environment variables provider
+- [x] Dotenv file provider
+- [x] Credential caching (AES-256, offline mode)
+- [x] Request history (replay, curl/HTTPie export)
+- [x] Interactive TUI mode
+- [x] Interactive auth setup
+- [x] Self-update command
+- [x] Codecov integration
+- [x] Documentation site
+- [x] Landing page
+- [x] Cross-platform release automation
 - [ ] HashiCorp Vault provider
-- [ ] Request history
-- [ ] TUI mode
+- [ ] TUI clipboard copy support
+- [ ] Integration tests
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for detailed planning.
 
@@ -274,6 +424,9 @@ go mod download
 # Build
 go build -o sreq ./cmd/sreq
 
+# Test
+go test ./...
+
 # Run
 ./sreq --help
 ```
@@ -290,4 +443,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Author
 
-Built by [Priyanshu](https://priyans-hu.netlify.app) · [GitHub](https://github.com/Priyans-hu)
+Built by [Priyanshu](https://github.com/Priyans-hu) · [LinkedIn](https://linkedin.com/in/priyans-hu)
